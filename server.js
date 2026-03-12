@@ -20,24 +20,26 @@ async function accessSheet() {
   return doc.sheetsByIndex[0]; // first sheet
 }
 
-app.post("/vapi/webhook", async (req, res) => {
+app.post("/vapi/webhook", (req, res) => {
   const event = req.body;
 
-  console.log("Webhook received:", event);
+  // Respond immediately to Vapi
+  res.status(200).send("ok");
 
+  // Do the Google Sheet write asynchronously
   if (event.message?.type === "end-of-call-report") {
     const structuredData = event.analysis?.structuredData;
 
-    try {
-      const sheet = await accessSheet();
-      await sheet.addRow(structuredData);
-      console.log("Data added to Google Sheet:", structuredData);
-    } catch (err) {
-      console.error("Error writing to Google Sheet:", err);
-    }
+    (async () => {
+      try {
+        const sheet = await accessSheet();
+        await sheet.addRow(structuredData);
+        console.log("Data added to Google Sheet:", structuredData);
+      } catch (err) {
+        console.error("Error writing to Google Sheet:", err);
+      }
+    })();
   }
-
-  res.status(200).send("ok");
 });
 
 const PORT = process.env.PORT || 3000;
