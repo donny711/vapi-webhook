@@ -1,5 +1,6 @@
 const express = require("express");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { JWT } = require("google-auth-library");
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -16,6 +17,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
 }
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
+
 let cachedSheet = null;
 let sheetInitPromise = null;
 
@@ -23,11 +25,15 @@ async function getSheet() {
   if (cachedSheet) return cachedSheet;
   if (!sheetInitPromise) {
     sheetInitPromise = (async () => {
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY,
+      const serviceAccountAuth = new JWT({
+        email: CLIENT_EMAIL,
+        key: PRIVATE_KEY,
+        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
+
+      await doc.useServiceAccountAuth(serviceAccountAuth);
       await doc.loadInfo();
+
       cachedSheet = doc.sheetsByIndex[0];
       return cachedSheet;
     })();
