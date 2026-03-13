@@ -75,11 +75,12 @@ async function getSheet() {
         );
       }
 
-      if (
-        (!sheet.headerValues || sheet.headerValues.length === 0) &&
-        typeof sheet.setHeaderRow === "function"
-      ) {
+      // v5: must load headers before reading headerValues
+      await sheet.loadHeaderRow();
+
+      if (!sheet.headerValues || sheet.headerValues.length === 0) {
         await sheet.setHeaderRow(HEADERS);
+        await sheet.loadHeaderRow();
       }
 
       cachedSheet = sheet;
@@ -97,7 +98,6 @@ app.post("/vapi/webhook", (req, res) => {
   res.sendStatus(200);
 
   const type = req.body?.message?.type;
-
   if (type !== "end-of-call-report") return;
 
   const structuredData = req.body?.message?.analysis?.structuredData;
