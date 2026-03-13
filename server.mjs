@@ -1,8 +1,8 @@
 import express from "express";
-import gs from "google-spreadsheet";
+import * as gs from "google-spreadsheet";
 import { JWT } from "google-auth-library";
 
-const GoogleSpreadsheet = gs.GoogleSpreadsheet || gs.default || gs;
+const { GoogleSpreadsheet } = gs;
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -69,7 +69,6 @@ async function getSheet() {
       if (typeof doc.setAuth === "function") {
         await doc.setAuth(auth);
       } else if (typeof doc.useServiceAccountAuth === "function") {
-        // fallback for older versions
         await doc.useServiceAccountAuth(auth);
       } else {
         throw new Error(
@@ -89,10 +88,8 @@ async function getSheet() {
         );
       }
 
-      if (!sheet.headerValues || sheet.headerValues.length === 0) {
-        if (typeof sheet.setHeaderRow === "function") {
-          await sheet.setHeaderRow(HEADERS);
-        }
+      if ((!sheet.headerValues || sheet.headerValues.length === 0) && typeof sheet.setHeaderRow === "function") {
+        await sheet.setHeaderRow(HEADERS);
       }
 
       cachedSheet = sheet;
@@ -120,35 +117,4 @@ app.post("/vapi/webhook", (req, res) => {
 
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: structuredData.phone_number ?? "",
-    pain_complaint: structuredData.pain_complaint ?? "",
-    caller_id_number: structuredData.caller_id_number ?? "",
-    has_exact_datetime:
-      typeof structuredData.has_exact_datetime === "boolean"
-        ? structuredData.has_exact_datetime
-        : "",
-    appointment_datetime: structuredData.appointment_datetime ?? "",
-  };
-
-  (async () => {
-    try {
-      const sheet = await getSheet();
-      await withRetry(() => sheet.addRow(row));
-      console.log("Data added to Google Sheet");
-    } catch (err) {
-      const msg = err?.message || err;
-
-      if (String(msg).includes("The caller does not have permission")) {
-        console.error(
-          "Permission error: share the Google Sheet with GOOGLE_CLIENT_EMAIL as Editor."
-        );
-        return;
-      }
-
-      console.error("Error writing to Google Sheet:", msg);
-    }
-  })();
-});
-
-const PORT = Number(process.env.PORT || 10000);
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+   
