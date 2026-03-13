@@ -85,7 +85,7 @@ async function getSheet() {
 
       if (!sheet) {
         throw new Error(
-          'Worksheet not found. Set GOOGLE_SHEET_TAB_NAME to an existing tab name.'
+          "Worksheet not found. Set GOOGLE_SHEET_TAB_NAME to an existing tab name."
         );
       }
 
@@ -122,4 +122,26 @@ app.post("/vapi/webhook", (req, res) => {
 
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: structuredData.phone
+    phone_number: structuredData.phone_number ?? "",
+    pain_complaint: structuredData.pain_complaint ?? "",
+    caller_id_number: structuredData.caller_id_number ?? "",
+    has_exact_datetime:
+      typeof structuredData.has_exact_datetime === "boolean"
+        ? structuredData.has_exact_datetime
+        : "",
+    appointment_datetime: structuredData.appointment_datetime ?? "",
+  };
+
+  (async () => {
+    try {
+      const sheet = await getSheet();
+      await withRetry(() => sheet.addRow(row));
+      console.log("Data added to Google Sheet");
+    } catch (err) {
+      console.error("Error writing to Google Sheet:", err?.message || err);
+    }
+  })();
+});
+
+const PORT = Number(process.env.PORT || 10000);
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
