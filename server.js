@@ -25,15 +25,16 @@ async function getSheet() {
   if (cachedSheet) return cachedSheet;
   if (!sheetInitPromise) {
     sheetInitPromise = (async () => {
-      const serviceAccountAuth = new JWT({
+      const auth = new JWT({
         email: CLIENT_EMAIL,
         key: PRIVATE_KEY,
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      await doc.useServiceAccountAuth(serviceAccountAuth);
-      await doc.loadInfo();
+      // v5 API:
+      await doc.setAuth(auth);
 
+      await doc.loadInfo();
       cachedSheet = doc.sheetsByIndex[0];
       return cachedSheet;
     })();
@@ -42,7 +43,7 @@ async function getSheet() {
 }
 
 app.post("/vapi/webhook", (req, res) => {
-  // Respond immediately so Vapi doesn't timeout
+  // IMPORTANT: respond immediately so Vapi doesn't timeout
   res.sendStatus(200);
 
   const event = req.body;
@@ -57,7 +58,6 @@ app.post("/vapi/webhook", (req, res) => {
     return;
   }
 
-  // Fire-and-forget async write
   (async () => {
     try {
       const sheet = await getSheet();
@@ -81,5 +81,5 @@ app.post("/vapi/webhook", (req, res) => {
   })();
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
