@@ -4,13 +4,16 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 
-// Load google-spreadsheet via require to avoid ESM export ambiguity
+// Load google-spreadsheet via require (avoids ESM export ambiguity)
 const gs = require("google-spreadsheet");
 const GoogleSpreadsheet =
   gs.GoogleSpreadsheet || gs.default?.GoogleSpreadsheet || gs.default || gs;
 
+// --- DIAGNOSTICS (keep for now) ---
+console.log("google-spreadsheet module keys:", Object.keys(gs));
+console.log("GoogleSpreadsheet typeof:", typeof GoogleSpreadsheet);
+
 if (typeof GoogleSpreadsheet !== "function") {
-  console.error("google-spreadsheet export keys:", Object.keys(gs));
   throw new Error("GoogleSpreadsheet constructor not found in google-spreadsheet exports.");
 }
 
@@ -29,8 +32,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
   process.exit(1);
 }
 
-console.log("Booting webhook server");
-console.log("doc constructor ok:", typeof GoogleSpreadsheet === "function");
+console.log("Booting webhook server", { node: process.version });
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
 
@@ -38,6 +40,10 @@ console.log("doc auth methods:", {
   setAuth: typeof doc.setAuth,
   useServiceAccountAuth: typeof doc.useServiceAccountAuth,
 });
+console.log(
+  "doc prototype methods:",
+  Object.getOwnPropertyNames(Object.getPrototypeOf(doc))
+);
 
 let cachedSheet = null;
 let sheetInitPromise = null;
