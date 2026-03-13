@@ -18,12 +18,10 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
 
-// Optional debug (remove later)
-console.log("google-spreadsheet pkg version:", require("google-spreadsheet/package.json").version);
-console.log("doc methods:", {
-  setAuth: typeof doc.setAuth,
-  useServiceAccountAuth: typeof doc.useServiceAccountAuth,
-});
+console.log(
+  "google-spreadsheet pkg version:",
+  require("google-spreadsheet/package.json").version
+);
 
 let cachedSheet = null;
 let sheetInitPromise = null;
@@ -72,4 +70,21 @@ app.post("/vapi/webhook", (req, res) => {
       await sheet.addRow({
         full_name: structuredData.full_name || "",
         phone_number: structuredData.phone_number || "",
-        pain_complaint: structuredData
+        pain_complaint: structuredData.pain_complaint || "",
+        caller_id_number: structuredData.caller_id_number || "",
+        has_exact_datetime:
+          typeof structuredData.has_exact_datetime === "boolean"
+            ? structuredData.has_exact_datetime
+            : "",
+        appointment_datetime: structuredData.appointment_datetime || "",
+      });
+
+      console.log("Data added to Google Sheet:", structuredData);
+    } catch (err) {
+      console.error("Error writing to Google Sheet:", err?.message || err);
+    }
+  })();
+});
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
