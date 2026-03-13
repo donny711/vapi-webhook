@@ -1,8 +1,11 @@
 import express from "express";
-import * as gs from "google-spreadsheet";
 import { JWT } from "google-auth-library";
 
-const { GoogleSpreadsheet } = gs;
+// Import "hard" (evită export/interop issues)
+import { GoogleSpreadsheet } from "google-spreadsheet/dist/index.js";
+
+// Runtime version check
+import pkg from "google-spreadsheet/package.json" with { type: "json" };
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -20,7 +23,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
 }
 
 console.log("Booting webhook server");
-console.log("google-spreadsheet export keys:", Object.keys(gs));
+console.log("google-spreadsheet runtime version:", pkg.version);
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
 
@@ -67,16 +70,14 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      if (typeof doc.setAuth === "function") {
-        await doc.setAuth(auth);
-      } else if (typeof doc.useServiceAccountAuth === "function") {
-        await doc.useServiceAccountAuth(auth);
-      } else {
+      // v5: setAuth
+      if (typeof doc.setAuth !== "function") {
         throw new Error(
-          "No supported auth method found on doc (expected setAuth or useServiceAccountAuth)."
+          "doc.setAuth missing. This indicates the wrong google-spreadsheet build/version is being loaded."
         );
       }
 
+      await doc.setAuth(auth);
       await doc.loadInfo();
 
       const sheet = SHEET_TAB_NAME
@@ -138,7 +139,16 @@ app.post("/vapi/webhook", (req, res) => {
       await withRetry(() => sheet.addRow(row));
       console.log("Data added to Google Sheet");
     } catch (err) {
-      console.error("Error writing to Google Sheet:", err?.message || err);
+      const msg = err?.message || err;
+
+      if (String(msg).includes("The caller does not have permission")) {
+        console.error(
+          "Permission error: share the Google Sheet with GOOGLE_CLIENT_EMAIL as Editor."
+        );
+        return;
+      }
+
+      console.error("Error writing to Google Sheet:", msg);
     }
   })();
 });
