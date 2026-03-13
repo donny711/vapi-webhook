@@ -1,5 +1,5 @@
 const express = require("express");
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+const GoogleSpreadsheet = require("google-spreadsheet");
 const { JWT } = require("google-auth-library");
 
 const app = express();
@@ -18,6 +18,13 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
 
+// Optional debug (remove later)
+console.log("google-spreadsheet pkg version:", require("google-spreadsheet/package.json").version);
+console.log("doc methods:", {
+  setAuth: typeof doc.setAuth,
+  useServiceAccountAuth: typeof doc.useServiceAccountAuth,
+});
+
 let cachedSheet = null;
 let sheetInitPromise = null;
 
@@ -31,7 +38,7 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      // v5 API:
+      // google-spreadsheet v5 auth
       await doc.setAuth(auth);
 
       await doc.loadInfo();
@@ -43,7 +50,7 @@ async function getSheet() {
 }
 
 app.post("/vapi/webhook", (req, res) => {
-  // IMPORTANT: respond immediately so Vapi doesn't timeout
+  // respond immediately so Vapi doesn't timeout
   res.sendStatus(200);
 
   const event = req.body;
@@ -65,21 +72,4 @@ app.post("/vapi/webhook", (req, res) => {
       await sheet.addRow({
         full_name: structuredData.full_name || "",
         phone_number: structuredData.phone_number || "",
-        pain_complaint: structuredData.pain_complaint || "",
-        caller_id_number: structuredData.caller_id_number || "",
-        has_exact_datetime:
-          typeof structuredData.has_exact_datetime === "boolean"
-            ? structuredData.has_exact_datetime
-            : "",
-        appointment_datetime: structuredData.appointment_datetime || "",
-      });
-
-      console.log("Data added to Google Sheet:", structuredData);
-    } catch (err) {
-      console.error("Error writing to Google Sheet:", err?.message || err);
-    }
-  })();
-});
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        pain_complaint: structuredData
