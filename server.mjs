@@ -1,6 +1,8 @@
 import express from "express";
-import { GoogleSpreadsheet } from "google-spreadsheet";
+import gs from "google-spreadsheet";
 import { JWT } from "google-auth-library";
+
+const GoogleSpreadsheet = gs.GoogleSpreadsheet || gs.default || gs;
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -11,11 +13,21 @@ const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
 if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
-  console.error("Missing env vars: GOOGLE_SHEET_ID / GOOGLE_CLIENT_EMAIL / GOOGLE_PRIVATE_KEY");
+  console.error(
+    "Missing env vars: GOOGLE_SHEET_ID / GOOGLE_CLIENT_EMAIL / GOOGLE_PRIVATE_KEY"
+  );
   process.exit(1);
 }
 
+console.log("Booting webhook server");
+console.log("google-spreadsheet export keys:", Object.keys(gs));
+
 const doc = new GoogleSpreadsheet(SHEET_ID);
+
+console.log("doc auth methods:", {
+  setAuth: typeof doc.setAuth,
+  useServiceAccountAuth: typeof doc.useServiceAccountAuth,
+});
 
 let cachedSheet = null;
 let sheetInitPromise = null;
@@ -54,7 +66,17 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      await doc.setAuth(auth);
+      if (typeof doc.setAuth === "function") {
+        await doc.setAuth(auth);
+      } else if (typeof doc.useServiceAccountAuth === "function") {
+        // fallback for older versions
+        await doc.useServiceAccountAuth(auth);
+      } else {
+        throw new Error(
+          "No supported auth method found on doc (expected setAuth or useServiceAccountAuth)."
+        );
+      }
+
       await doc.loadInfo();
 
       const sheet = SHEET_TAB_NAME
@@ -68,7 +90,9 @@ async function getSheet() {
       }
 
       if (!sheet.headerValues || sheet.headerValues.length === 0) {
-        await sheet.setHeaderRow(HEADERS);
+        if (typeof sheet.setHeaderRow === "function") {
+          await sheet.setHeaderRow(HEADERS);
+        }
       }
 
       cachedSheet = sheet;
@@ -81,7 +105,6 @@ async function getSheet() {
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
 app.post("/vapi/webhook", (req, res) => {
-  // respond immediately so Vapi doesn't timeout
   res.sendStatus(200);
 
   const type = req.body?.message?.type;
