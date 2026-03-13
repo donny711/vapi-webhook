@@ -1,11 +1,20 @@
 import express from "express";
 import { JWT } from "google-auth-library";
+import { createRequire } from "module";
 
-// Import "hard" (evită export/interop issues)
-import { GoogleSpreadsheet } from "google-spreadsheet/dist/index.js";
+const require = createRequire(import.meta.url);
 
-// Runtime version check
-import pkg from "google-spreadsheet/package.json" with { type: "json" };
+// Load google-spreadsheet via require to avoid ESM export ambiguity
+const gs = require("google-spreadsheet");
+const GoogleSpreadsheet =
+  gs.GoogleSpreadsheet || gs.default?.GoogleSpreadsheet || gs.default || gs;
+
+const pkg = require("google-spreadsheet/package.json");
+
+if (typeof GoogleSpreadsheet !== "function") {
+  console.error("google-spreadsheet export keys:", Object.keys(gs));
+  throw new Error("GoogleSpreadsheet constructor not found in google-spreadsheet exports.");
+}
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -70,14 +79,16 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      // v5: setAuth
-      if (typeof doc.setAuth !== "function") {
+      if (typeof doc.setAuth === "function") {
+        await doc.setAuth(auth);
+      } else if (typeof doc.useServiceAccountAuth === "function") {
+        await doc.useServiceAccountAuth(auth);
+      } else {
         throw new Error(
-          "doc.setAuth missing. This indicates the wrong google-spreadsheet build/version is being loaded."
+          "No supported auth method found on doc (expected setAuth or useServiceAccountAuth)."
         );
       }
 
-      await doc.setAuth(auth);
       await doc.loadInfo();
 
       const sheet = SHEET_TAB_NAME
