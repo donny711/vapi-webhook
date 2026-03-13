@@ -9,8 +9,6 @@ const gs = require("google-spreadsheet");
 const GoogleSpreadsheet =
   gs.GoogleSpreadsheet || gs.default?.GoogleSpreadsheet || gs.default || gs;
 
-const pkg = require("google-spreadsheet/package.json");
-
 if (typeof GoogleSpreadsheet !== "function") {
   console.error("google-spreadsheet export keys:", Object.keys(gs));
   throw new Error("GoogleSpreadsheet constructor not found in google-spreadsheet exports.");
@@ -32,7 +30,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
 }
 
 console.log("Booting webhook server");
-console.log("google-spreadsheet runtime version:", pkg.version);
+console.log("doc constructor ok:", typeof GoogleSpreadsheet === "function");
 
 const doc = new GoogleSpreadsheet(SHEET_ID);
 
