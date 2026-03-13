@@ -58,6 +58,7 @@ async function withRetry(fn, retries = 3) {
 
 async function getSheet() {
   if (cachedSheet) return cachedSheet;
+
   if (!sheetInitPromise) {
     sheetInitPromise = (async () => {
       const auth = new JWT({
@@ -84,11 +85,14 @@ async function getSheet() {
 
       if (!sheet) {
         throw new Error(
-          `Worksheet not found. Set GOOGLE_SHEET_TAB_NAME to an existing tab name.`
+          'Worksheet not found. Set GOOGLE_SHEET_TAB_NAME to an existing tab name.'
         );
       }
 
-      if ((!sheet.headerValues || sheet.headerValues.length === 0) && typeof sheet.setHeaderRow === "function") {
+      if (
+        (!sheet.headerValues || sheet.headerValues.length === 0) &&
+        typeof sheet.setHeaderRow === "function"
+      ) {
         await sheet.setHeaderRow(HEADERS);
       }
 
@@ -96,6 +100,7 @@ async function getSheet() {
       return sheet;
     })();
   }
+
   return sheetInitPromise;
 }
 
@@ -117,4 +122,4 @@ app.post("/vapi/webhook", (req, res) => {
 
   const row = {
     full_name: structuredData.full_name ?? "",
-   
+    phone_number: structuredData.phone
