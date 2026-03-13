@@ -3,19 +3,7 @@ import { JWT } from "google-auth-library";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-
-// Load google-spreadsheet via require (avoids ESM export ambiguity)
-const gs = require("google-spreadsheet");
-const GoogleSpreadsheet =
-  gs.GoogleSpreadsheet || gs.default?.GoogleSpreadsheet || gs.default || gs;
-
-// --- DIAGNOSTICS (keep for now) ---
-console.log("google-spreadsheet module keys:", Object.keys(gs));
-console.log("GoogleSpreadsheet typeof:", typeof GoogleSpreadsheet);
-
-if (typeof GoogleSpreadsheet !== "function") {
-  throw new Error("GoogleSpreadsheet constructor not found in google-spreadsheet exports.");
-}
+const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -32,18 +20,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
   process.exit(1);
 }
 
-console.log("Booting webhook server", { node: process.version });
-
 const doc = new GoogleSpreadsheet(SHEET_ID);
-
-console.log("doc auth methods:", {
-  setAuth: typeof doc.setAuth,
-  useServiceAccountAuth: typeof doc.useServiceAccountAuth,
-});
-console.log(
-  "doc prototype methods:",
-  Object.getOwnPropertyNames(Object.getPrototypeOf(doc))
-);
 
 let cachedSheet = null;
 let sheetInitPromise = null;
@@ -83,15 +60,8 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      if (typeof doc.setAuth === "function") {
-        await doc.setAuth(auth);
-      } else if (typeof doc.useServiceAccountAuth === "function") {
-        await doc.useServiceAccountAuth(auth);
-      } else {
-        throw new Error(
-          "No supported auth method found on doc (expected setAuth or useServiceAccountAuth)."
-        );
-      }
+      // google-spreadsheet v5 auth
+      doc.auth = auth;
 
       await doc.loadInfo();
 
@@ -123,18 +93,15 @@ async function getSheet() {
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
 app.post("/vapi/webhook", (req, res) => {
+  // reply immediately to avoid timeouts
   res.sendStatus(200);
 
   const type = req.body?.message?.type;
-  console.log("Webhook received:", type);
 
   if (type !== "end-of-call-report") return;
 
   const structuredData = req.body?.message?.analysis?.structuredData;
-  if (!structuredData || typeof structuredData !== "object") {
-    console.log("No structuredData; skipping");
-    return;
-  }
+  if (!structuredData || typeof structuredData !== "object") return;
 
   const row = {
     full_name: structuredData.full_name ?? "",
