@@ -98,23 +98,29 @@ async function cautaPacientDupaCaller(callerId) {
   }
 }
 
+function extrageOra(appointmentDatetime) {
+  return appointmentDatetime.match(/T(\d{2}:\d{2})/)?.[1] || appointmentDatetime;
+}
+
+function normalizeazaTelefon(telefon) {
+  let t = telefon.replace(/\D/g, "");
+  if (t.startsWith("40")) t = "0" + t.slice(2);
+  if (!t.startsWith("0")) t = "0" + t;
+  return t;
+}
+
 async function trimiteReminderSMS(telefon, numePacient, dataOra) {
   if (!SMSLINK_ID || !SMSLINK_PWD) {
     console.warn("SMSLINK credentials lipsa, SMS netrimis.");
     return;
   }
 
-  let telefonNormalizat = telefon.replace(/\D/g, "");
-  if (telefonNormalizat.startsWith("40")) {
-    telefonNormalizat = "0" + telefonNormalizat.slice(2);
-  }
-  if (!telefonNormalizat.startsWith("0")) {
-    telefonNormalizat = "0" + telefonNormalizat;
-  }
+  const telefonNormalizat = normalizeazaTelefon(telefon);
+  const ora = extrageOra(dataOra);
 
   const mesaj =
     `Juni Performance: Buna ziua, ${numePacient}! Va asteptam maine ` +
-    `la ${dataOra}. Reprogramari: ${CLINIC_PHONE}.`;
+    `la ora ${ora}. Reprogramari: ${CLINIC_PHONE}.`;
 
   const url =
     `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
@@ -153,9 +159,7 @@ cron.schedule("0 10 * * *", async () => {
       if (!appointmentDatetime || reminderSent === "true") continue;
       if (!appointmentDatetime.includes(dataMaine)) continue;
 
-      const ora = appointmentDatetime.split(" ")[1] || appointmentDatetime;
-      await trimiteReminderSMS(telefon, numePacient, ora);
-
+      await trimiteReminderSMS(telefon, numePacient, appointmentDatetime);
       row.set("reminder_sent", "true");
       await withRetry(() => row.save());
       trimise++;
