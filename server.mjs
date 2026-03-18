@@ -3,16 +3,7 @@ import { JWT } from "google-auth-library";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-
-// Load google-spreadsheet via require to avoid ESM export ambiguity
-const gs = require("google-spreadsheet");
-const GoogleSpreadsheet =
-  gs.GoogleSpreadsheet || gs.default?.GoogleSpreadsheet || gs.default || gs;
-
-if (typeof GoogleSpreadsheet !== "function") {
-  console.error("google-spreadsheet export keys:", Object.keys(gs));
-  throw new Error("GoogleSpreadsheet constructor not found in google-spreadsheet exports.");
-}
+const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -29,15 +20,7 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
   process.exit(1);
 }
 
-console.log("Booting webhook server");
-console.log("doc constructor ok:", typeof GoogleSpreadsheet === "function");
-
 const doc = new GoogleSpreadsheet(SHEET_ID);
-
-console.log("doc auth methods:", {
-  setAuth: typeof doc.setAuth,
-  useServiceAccountAuth: typeof doc.useServiceAccountAuth,
-});
 
 let cachedSheet = null;
 let sheetInitPromise = null;
@@ -77,15 +60,7 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      if (typeof doc.setAuth === "function") {
-        await doc.setAuth(auth);
-      } else if (typeof doc.useServiceAccountAuth === "function") {
-        await doc.useServiceAccountAuth(auth);
-      } else {
-        throw new Error(
-          "No supported auth method found on doc (expected setAuth or useServiceAccountAuth)."
-        );
-      }
+      doc.auth = auth;
 
       await doc.loadInfo();
 
@@ -99,11 +74,11 @@ async function getSheet() {
         );
       }
 
-      if (
-        (!sheet.headerValues || sheet.headerValues.length === 0) &&
-        typeof sheet.setHeaderRow === "function"
-      ) {
+      await sheet.loadHeaderRow();
+
+      if (!sheet.headerValues || sheet.headerValues.length === 0) {
         await sheet.setHeaderRow(HEADERS);
+        await sheet.loadHeaderRow();
       }
 
       cachedSheet = sheet;
@@ -117,28 +92,31 @@ async function getSheet() {
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
 app.post("/vapi/webhook", (req, res) => {
+  // reply immediately to avoid timeouts
   res.sendStatus(200);
 
   const type = req.body?.message?.type;
-  console.log("Webhook received:", type);
-
   if (type !== "end-of-call-report") return;
 
   const structuredData = req.body?.message?.analysis?.structuredData;
-  if (!structuredData || typeof structuredData !== "object") {
-    console.log("No structuredData; skipping");
+  if (!structuredData || typeof structuredData !== "object") return;
+
+  // ✅ Only proceed if appointment has exact datetime
+  if (structuredData.has_exact_datetime !== true) {
+    console.log("Skipping row: has_exact_datetime is not true");
     return;
   }
 
+  // ✅ Caller ID from Vapi metadata
+  const call = req.body?.message?.call;
+  const callerId = call?.customer?.number ?? "";
+
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: structuredData.phone_number ?? "",
+    phone_number: callerId || structuredData.phone_number || "",
     pain_complaint: structuredData.pain_complaint ?? "",
-    caller_id_number: structuredData.caller_id_number ?? "",
-    has_exact_datetime:
-      typeof structuredData.has_exact_datetime === "boolean"
-        ? structuredData.has_exact_datetime
-        : "",
+    caller_id_number: callerId || structuredData.caller_id_number || "",
+    has_exact_datetime: true,
     appointment_datetime: structuredData.appointment_datetime ?? "",
   };
 
