@@ -273,3 +273,4 @@ app.get("/test-reminders", async (_req, res) => {
 // ─── START ─────────────────────────────────────────────────────────────────
 const PORT = Number(process.env.PORT || 10000);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+ 
