@@ -60,7 +60,6 @@ async function getSheet() {
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
 
-      // google-spreadsheet v5 auth
       doc.auth = auth;
 
       await doc.loadInfo();
@@ -75,7 +74,6 @@ async function getSheet() {
         );
       }
 
-      // v5: must load headers before reading headerValues
       await sheet.loadHeaderRow();
 
       if (!sheet.headerValues || sheet.headerValues.length === 0) {
@@ -103,11 +101,19 @@ app.post("/vapi/webhook", (req, res) => {
   const structuredData = req.body?.message?.analysis?.structuredData;
   if (!structuredData || typeof structuredData !== "object") return;
 
+  // ✅ Real Caller ID comes from call metadata, not from structuredData
+  const call = req.body?.message?.call;
+  const callerId = call?.customer?.number ?? "";
+
+  // If callerId is missing, fall back to extracted values (optional)
+  const phoneNumber = callerId || structuredData.phone_number || "";
+  const callerIdNumber = callerId || structuredData.caller_id_number || "";
+
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: structuredData.phone_number ?? "",
+    phone_number: phoneNumber,
     pain_complaint: structuredData.pain_complaint ?? "",
-    caller_id_number: structuredData.caller_id_number ?? "",
+    caller_id_number: callerIdNumber,
     has_exact_datetime:
       typeof structuredData.has_exact_datetime === "boolean"
         ? structuredData.has_exact_datetime
