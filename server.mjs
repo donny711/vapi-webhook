@@ -101,20 +101,22 @@ app.post("/vapi/webhook", (req, res) => {
   const structuredData = req.body?.message?.analysis?.structuredData;
   if (!structuredData || typeof structuredData !== "object") return;
 
-  // ✅ Caller ID from Vapi metadata (not from structuredData)
+  // ✅ Only proceed if appointment has exact datetime
+  if (structuredData.has_exact_datetime !== true) {
+    console.log("Skipping row: has_exact_datetime is not true");
+    return;
+  }
+
+  // ✅ Caller ID from Vapi metadata
   const call = req.body?.message?.call;
   const callerId = call?.customer?.number ?? "";
 
-  // Fill sheet columns
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: callerId || structuredData.phone_number || "", // <-- "phone_number" column
+    phone_number: callerId || structuredData.phone_number || "",
     pain_complaint: structuredData.pain_complaint ?? "",
     caller_id_number: callerId || structuredData.caller_id_number || "",
-    has_exact_datetime:
-      typeof structuredData.has_exact_datetime === "boolean"
-        ? structuredData.has_exact_datetime
-        : "",
+    has_exact_datetime: true,
     appointment_datetime: structuredData.appointment_datetime ?? "",
   };
 
