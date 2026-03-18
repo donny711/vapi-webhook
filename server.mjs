@@ -101,19 +101,16 @@ app.post("/vapi/webhook", (req, res) => {
   const structuredData = req.body?.message?.analysis?.structuredData;
   if (!structuredData || typeof structuredData !== "object") return;
 
-  // ✅ Real Caller ID comes from call metadata, not from structuredData
+  // ✅ Caller ID from Vapi metadata (not from structuredData)
   const call = req.body?.message?.call;
   const callerId = call?.customer?.number ?? "";
 
-  // If callerId is missing, fall back to extracted values (optional)
-  const phoneNumber = callerId || structuredData.phone_number || "";
-  const callerIdNumber = callerId || structuredData.caller_id_number || "";
-
+  // Fill sheet columns
   const row = {
     full_name: structuredData.full_name ?? "",
-    phone_number: phoneNumber,
+    phone_number: callerId || structuredData.phone_number || "", // <-- "phone_number" column
     pain_complaint: structuredData.pain_complaint ?? "",
-    caller_id_number: callerIdNumber,
+    caller_id_number: callerId || structuredData.caller_id_number || "",
     has_exact_datetime:
       typeof structuredData.has_exact_datetime === "boolean"
         ? structuredData.has_exact_datetime
