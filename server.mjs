@@ -10,10 +10,7 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public")); // servește crm.html din folderul public/
 
-<<<<<<< HEAD
-// ─── ENV ───────────────────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
+
 const SHEET_ID       = process.env.GOOGLE_SHEET_ID;
 const SHEET_TAB_NAME = process.env.GOOGLE_SHEET_TAB_NAME || "";
 const CLIENT_EMAIL   = process.env.GOOGLE_CLIENT_EMAIL;
