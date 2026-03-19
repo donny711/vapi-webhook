@@ -122,6 +122,7 @@ function getFiltrati(){
     return ms&&mf;
   });
 }
+function dotColor(sr){return sr===0?"#ef4444":sr<=3?"#f59e0b":"#22c55e";}
 function render(){
   const filtrati=getFiltrati();
   const urgenti=pacienti.filter(p=>getLocal(p,"urgent")).length;
@@ -134,7 +135,8 @@ function render(){
     ?`<div style="text-align:center;color:#334155;margin-top:40px;font-size:13px">Niciun pacient găsit</div>`
     :filtrati.map(p=>{
       const isUrgent=getLocal(p,"urgent");
-      const dotC=isUrgent?"#f59e0b":"#22c55e";
+      const sr=getLocal(p,"sedinte_ramase");
+      const dotC=dotColor(sr);
       return`<div class="pac-card ${p.telefon===selectedTelefon?'active':''}" onclick="selectPacient('${p.telefon}')">
         <div class="avatar">${initiale(p.nume)}</div>
         <div class="pac-info">
