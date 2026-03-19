@@ -10,10 +10,7 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public")); // servește crm.html din folderul public/
 
-<<<<<<< HEAD
 // ─── ENV ───────────────────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 const SHEET_ID       = process.env.GOOGLE_SHEET_ID;
 const SHEET_TAB_NAME = process.env.GOOGLE_SHEET_TAB_NAME || "";
 const CLIENT_EMAIL   = process.env.GOOGLE_CLIENT_EMAIL;
@@ -40,11 +37,8 @@ const HEADERS = [
   "has_exact_datetime",
   "appointment_datetime",
   "reminder_sent",
-<<<<<<< HEAD
   "sedinte_ramase",
   "note_terapeut",
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -85,10 +79,7 @@ async function getSheet() {
   return sheetInitPromise;
 }
 
-<<<<<<< HEAD
 // ─── RECUNOASTERE PACIENT ──────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 async function cautaPacientDupaCaller(callerId) {
   if (!callerId) return null;
   try {
@@ -109,10 +100,7 @@ async function cautaPacientDupaCaller(callerId) {
   }
 }
 
-<<<<<<< HEAD
 // ─── SMS VIA SMSLINK ───────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 function extrageOra(appointmentDatetime) {
   return appointmentDatetime.match(/T(\d{2}:\d{2})/)?.[1] || appointmentDatetime;
 }
@@ -154,58 +142,35 @@ async function trimiteReminderSMS(telefon, numePacient, dataOra) {
   }
 }
 
-<<<<<<< HEAD
 // ─── CRON: remindere zilnice la 10:00 ─────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 cron.schedule("0 10 * * *", async () => {
   console.log("[CRON] Verificare programari pentru maine...");
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
-<<<<<<< HEAD
     const maine = new Date();
     maine.setDate(maine.getDate() + 1);
     const dataMaine = maine.toISOString().split("T")[0];
-=======
-
-    const maine = new Date();
-    maine.setDate(maine.getDate() + 1);
-    const dataMaine = maine.toISOString().split("T")[0];
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
     let trimise = 0;
     for (const row of rows) {
       const appointmentDatetime = row.get("appointment_datetime") || "";
       const reminderSent        = row.get("reminder_sent") || "";
       const telefon             = row.get("phone_number") || row.get("caller_id_number") || "";
       const numePacient         = row.get("full_name") || "pacient";
-<<<<<<< HEAD
       if (!appointmentDatetime || reminderSent === "true") continue;
       if (!appointmentDatetime.includes(dataMaine)) continue;
-=======
-
-      if (!appointmentDatetime || reminderSent === "true") continue;
-      if (!appointmentDatetime.includes(dataMaine)) continue;
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
       await trimiteReminderSMS(telefon, numePacient, appointmentDatetime);
       row.set("reminder_sent", "true");
       await withRetry(() => row.save());
       trimise++;
       await sleep(500);
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
     console.log(`[CRON] Remindere trimise: ${trimise}`);
   } catch (err) {
     console.error("[CRON] Eroare:", err.message);
   }
 });
 
-<<<<<<< HEAD
 // ─── CRM API ───────────────────────────────────────────────────────────────
 
 // GET /pacienti — returnează toți pacienții unici (deduplicați după telefon)
@@ -282,8 +247,6 @@ app.put("/pacienti/:telefon", async (req, res) => {
 });
 
 // ─── ROUTES ────────────────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
 app.post("/vapi/webhook", (req, res) => {
@@ -292,18 +255,10 @@ app.post("/vapi/webhook", (req, res) => {
   if (type !== "end-of-call-report") return;
   const structuredData = req.body?.message?.analysis?.structuredData;
   if (!structuredData || typeof structuredData !== "object") return;
-<<<<<<< HEAD
-=======
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
   if (structuredData.has_exact_datetime !== true) {
     console.log("Skipping row: has_exact_datetime is not true");
     return;
   }
-<<<<<<< HEAD
-=======
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
   const call     = req.body?.message?.call;
   const callerId = call?.customer?.number ?? "";
   const row = {
@@ -314,11 +269,8 @@ app.post("/vapi/webhook", (req, res) => {
     has_exact_datetime:   true,
     appointment_datetime: structuredData.appointment_datetime ?? "",
     reminder_sent:        "false",
-<<<<<<< HEAD
     sedinte_ramase:       "",
     note_terapeut:        "",
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
   };
   (async () => {
     try {
@@ -327,7 +279,6 @@ app.post("/vapi/webhook", (req, res) => {
         console.log(`Pacient recurent recunoscut: ${pacientExistent.full_name} (${callerId})`);
       } else {
         console.log(`Pacient nou: ${row.full_name} (${callerId})`);
-<<<<<<< HEAD
       }
       const sheet = await getSheet();
       await withRetry(() => sheet.addRow(row));
@@ -338,78 +289,39 @@ app.post("/vapi/webhook", (req, res) => {
         console.error("Permission error: share the Google Sheet with GOOGLE_CLIENT_EMAIL as Editor.");
         return;
       }
-=======
-      }
-
-      const sheet = await getSheet();
-      await withRetry(() => sheet.addRow(row));
-      console.log("Date adaugate in Google Sheet");
-
-    } catch (err) {
-      const msg = err?.message || err;
-      if (String(msg).includes("The caller does not have permission")) {
-        console.error("Permission error: share the Google Sheet with GOOGLE_CLIENT_EMAIL as Editor.");
-        return;
-      }
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
       console.error("Eroare scriere in Google Sheet:", msg);
     }
   })();
 });
 
-<<<<<<< HEAD
 // ─── TEST REMINDERS ────────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 app.get("/test-reminders", async (_req, res) => {
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
-<<<<<<< HEAD
     const maine = new Date();
     maine.setDate(maine.getDate() + 1);
     const dataMaine = maine.toISOString().split("T")[0];
-=======
-
-    const maine = new Date();
-    maine.setDate(maine.getDate() + 1);
-    const dataMaine = maine.toISOString().split("T")[0];
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
     let trimise = 0;
     for (const row of rows) {
       const appointmentDatetime = row.get("appointment_datetime") || "";
       const reminderSent        = row.get("reminder_sent") || "";
       const telefon             = row.get("phone_number") || row.get("caller_id_number") || "";
       const numePacient         = row.get("full_name") || "pacient";
-<<<<<<< HEAD
       if (!appointmentDatetime || reminderSent === "true") continue;
       if (!appointmentDatetime.includes(dataMaine)) continue;
-=======
-
-      if (!appointmentDatetime || reminderSent === "true") continue;
-      if (!appointmentDatetime.includes(dataMaine)) continue;
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
       await trimiteReminderSMS(telefon, numePacient, appointmentDatetime);
       row.set("reminder_sent", "true");
       await withRetry(() => row.save());
       trimise++;
       await sleep(500);
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
     res.json({ success: true, trimise });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-<<<<<<< HEAD
 // ─── START ─────────────────────────────────────────────────────────────────
-=======
->>>>>>> c1b34feda25ac9d300d3b9f883ed2d851c9af5a5
 const PORT = Number(process.env.PORT || 10000);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
