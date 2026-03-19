@@ -43,34 +43,34 @@
   .badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-right: 8px; margin-bottom: 4px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 18px 20px; }
-  .card-label { font-size: 12px; color: #94a3b8; margin-bottom: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+  .card-label { font-size: 12px; color: #94a3b8; margin-bottom: 10px; font-family: 'DM Mono', monospace; }
   .sedinte-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .sedinte-num { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; }
-  .sedinte-sub { font-size: 13px; color: #475569; font-weight: 400; }
+  .sedinte-num { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; color: #22c55e; }
   .progress-bar { height: 4px; background: #1e293b; border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
-  .progress-fill { height: 100%; border-radius: 99px; }
+  .progress-fill { height: 100%; border-radius: 99px; background: #22c55e; }
   .btn-row { display: flex; gap: 8px; }
   .btn-sm { flex: 1; padding: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 18px; cursor: pointer; }
   .prog-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
   .prog-data { font-size: 13px; color: #e2e8f0; }
   .prog-ora { font-size: 13px; color: #22c55e; font-family: 'DM Mono', monospace; }
-  .hist-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-  .hist-dot { width: 6px; height: 6px; border-radius: 50%; background: #334155; flex-shrink: 0; }
-  .hist-data { font-size: 13px; color: #94a3b8; }
-  .hist-ora { font-size: 13px; color: #64748b; font-family: 'DM Mono', monospace; }
-  .hist-badge { margin-left: auto; font-size: 11px; color: #22c55e; background: #052e16; padding: 2px 8px; border-radius: 20px; }
   .note-text { font-size: 13px; color: #94a3b8; line-height: 1.7; }
   .note-edit { width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; color: #e2e8f0; font-size: 13px; line-height: 1.7; resize: vertical; min-height: 80px; }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .btn-edit { font-size: 12px; padding: 4px 12px; border-radius: 8px; border: 1px solid #334155; background: transparent; color: #94a3b8; cursor: pointer; }
-  #btn-save { width: 100%; padding: 13px 0; border-radius: 12px; border: none; background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px; margin-top: 4px; }
+  #btn-save { width: 100%; padding: 13px 0; border-radius: 12px; border: none; background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 4px; }
   #btn-save.saved { background: #052e16; color: #22c55e; }
   #empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #334155; font-size: 14px; }
-  .loading { display: flex; align-items: center; justify-content: center; height: 100%; color: #475569; font-size: 13px; }
+  .urgent-toggle { display: flex; align-items: center; gap: 10px; background: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 14px 20px; margin-bottom: 16px; cursor: pointer; transition: all 0.2s; }
+  .urgent-toggle.on { border-color: #f59e0b; background: #1c1200; }
+  .toggle-switch { width: 40px; height: 22px; border-radius: 99px; background: #1e293b; position: relative; flex-shrink: 0; transition: background 0.2s; }
+  .toggle-switch.on { background: #f59e0b; }
+  .toggle-knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 3px; left: 3px; transition: left 0.2s; }
+  .toggle-switch.on .toggle-knob { left: 21px; }
+  .urgent-label { font-size: 13px; font-weight: 600; color: #64748b; }
+  .urgent-toggle.on .urgent-label { color: #f59e0b; }
 </style>
 </head>
 <body>
-
 <div id="topbar">
   <div class="logo">
     <div class="logo-icon">🏥</div>
@@ -79,225 +79,139 @@
   </div>
   <div id="stats">Se încarcă...</div>
 </div>
-
 <div id="main">
   <div id="sidebar">
-    <div id="search-wrap">
-      <input id="search" placeholder="Caută pacient..." oninput="render()">
-    </div>
+    <div id="search-wrap"><input id="search" placeholder="Caută pacient..." oninput="render()"></div>
     <div id="filters">
       <button class="filter-btn active" data-f="toti" onclick="setFilter('toti')">Toți</button>
       <button class="filter-btn" data-f="urgent" onclick="setFilter('urgent')">⚠ Urgent</button>
       <button class="filter-btn" data-f="finalizat" onclick="setFilter('finalizat')">✓ Finalizat</button>
     </div>
-    <div id="list"><div class="loading">Se încarcă pacienții...</div></div>
+    <div id="list"><div style="text-align:center;color:#475569;padding:20px;font-size:13px">Se încarcă...</div></div>
   </div>
   <div id="content"><div id="empty">Selectează un pacient</div></div>
 </div>
-
 <script>
-// Detectează automat URL-ul API — dacă rulează local folosește Render, altfel același origin
-const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? "https://vapi-webhook-pcnp.onrender.com"
-  : "";
-
-let pacienti = [];
-let programariCache = {};
-let selectedTelefon = null;
-let filterVal = "toti";
-let editNote = false;
-let sedinteLocale = {};
-
-function initiale(nume) {
-  return (nume || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-}
-function dotColor(s) {
-  return s === 0 ? "#ef4444" : s <= 2 ? "#f59e0b" : "#22c55e";
-}
-
-async function loadPacienti() {
-  try {
-    const res = await fetch(`${API}/pacienti`);
-    pacienti = await res.json();
-    if (pacienti.length > 0) selectedTelefon = pacienti[0].telefon;
+const API = window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"?"https://vapi-webhook-pcnp.onrender.com":"";
+let pacienti=[],programariCache={},selectedTelefon=null,filterVal="toti",editNote=false,localState={};
+function initiale(n){return(n||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();}
+async function loadPacienti(){
+  try{
+    const res=await fetch(`${API}/pacienti`);
+    pacienti=await res.json();
+    if(pacienti.length>0){selectedTelefon=pacienti[0].telefon;loadProgramari(selectedTelefon);}
     render();
-    if (selectedTelefon) loadProgramari(selectedTelefon);
-  } catch (e) {
-    document.getElementById("list").innerHTML = `<div style="color:#ef4444;padding:16px;font-size:13px">Eroare la încărcare: ${e.message}</div>`;
-  }
+  }catch(e){document.getElementById("list").innerHTML=`<div style="color:#ef4444;padding:16px;font-size:13px">Eroare: ${e.message}</div>`;}
 }
-
-async function loadProgramari(telefon) {
-  if (programariCache[telefon]) return;
-  try {
-    const res = await fetch(`${API}/pacienti/${encodeURIComponent(telefon)}`);
-    programariCache[telefon] = await res.json();
-    if (selectedTelefon === telefon) renderProfil();
-  } catch (e) {
-    programariCache[telefon] = [];
-  }
+async function loadProgramari(telefon){
+  if(programariCache[telefon])return;
+  try{const res=await fetch(`${API}/pacienti/${encodeURIComponent(telefon)}`);programariCache[telefon]=await res.json();if(selectedTelefon===telefon)renderProfil();}
+  catch(e){programariCache[telefon]=[];}
 }
-
-function setFilter(f) {
-  filterVal = f;
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.dataset.f === f));
-  render();
-}
-
-function selectPacient(telefon) {
-  selectedTelefon = telefon;
-  editNote = false;
-  render();
-  loadProgramari(telefon);
-}
-
-function getFiltrati() {
-  const q = document.getElementById("search")?.value?.toLowerCase() || "";
-  return pacienti.filter(p => {
-    const ms = (p.nume||"").toLowerCase().includes(q) || (p.diagnostic||"").toLowerCase().includes(q) || (p.telefon||"").includes(q);
-    const sr = sedinteLocale[p.telefon] !== undefined ? sedinteLocale[p.telefon] : p.sedinte_ramase;
-    const mf = filterVal === "toti" ? true : filterVal === "urgent" ? (sr <= 2 && sr > 0) : sr === 0;
-    return ms && mf;
+function setFilter(f){filterVal=f;document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.f===f));render();}
+function selectPacient(telefon){selectedTelefon=telefon;editNote=false;render();loadProgramari(telefon);}
+function getLocal(pac,key){return localState[pac.telefon]?.[key]!==undefined?localState[pac.telefon][key]:pac[key];}
+function setLocal(telefon,key,val){if(!localState[telefon])localState[telefon]={};localState[telefon][key]=val;}
+function getFiltrati(){
+  const q=document.getElementById("search")?.value?.toLowerCase()||"";
+  return pacienti.filter(p=>{
+    const ms=(p.nume||"").toLowerCase().includes(q)||(p.diagnostic||"").toLowerCase().includes(q)||(p.telefon||"").includes(q);
+    const isUrgent=getLocal(p,"urgent");
+    const sr=getLocal(p,"sedinte_ramase");
+    const mf=filterVal==="toti"?true:filterVal==="urgent"?isUrgent:sr===0;
+    return ms&&mf;
   });
 }
-
-function render() {
-  const filtrati = getFiltrati();
-  const urgenti = pacienti.filter(p => { const s = sedinteLocale[p.telefon] !== undefined ? sedinteLocale[p.telefon] : p.sedinte_ramase; return s <= 2 && s > 0; }).length;
-  const finalizati = pacienti.filter(p => { const s = sedinteLocale[p.telefon] !== undefined ? sedinteLocale[p.telefon] : p.sedinte_ramase; return s === 0; }).length;
-
-  document.getElementById("stats").innerHTML =
-    `<span style="color:#f59e0b;font-weight:600">${urgenti}</span> urgente &middot; ` +
-    `<span style="color:#ef4444;font-weight:600">${finalizati}</span> finalizate &middot; ` +
+function render(){
+  const filtrati=getFiltrati();
+  const urgenti=pacienti.filter(p=>getLocal(p,"urgent")).length;
+  const finalizati=pacienti.filter(p=>getLocal(p,"sedinte_ramase")===0).length;
+  document.getElementById("stats").innerHTML=
+    `<span style="color:#f59e0b;font-weight:600">${urgenti}</span> urgente &middot; `+
+    `<span style="color:#ef4444;font-weight:600">${finalizati}</span> finalizate &middot; `+
     `<span style="color:#22c55e;font-weight:600">${pacienti.length}</span> total`;
-
-  document.getElementById("list").innerHTML = filtrati.length === 0
-    ? `<div style="text-align:center;color:#334155;margin-top:40px;font-size:13px">Niciun pacient găsit</div>`
-    : filtrati.map(p => {
-        const sr = sedinteLocale[p.telefon] !== undefined ? sedinteLocale[p.telefon] : p.sedinte_ramase;
-        return `
-          <div class="pac-card ${p.telefon === selectedTelefon ? 'active' : ''}" onclick="selectPacient('${p.telefon}')">
-            <div class="avatar">${initiale(p.nume)}</div>
-            <div class="pac-info">
-              <div class="pac-name">${p.nume}</div>
-              <div class="pac-diag">${p.diagnostic || '—'}</div>
-            </div>
-            <div class="dot" style="background:${dotColor(sr)};box-shadow:0 0 6px ${dotColor(sr)}"></div>
-          </div>`;
-      }).join("");
-
+  document.getElementById("list").innerHTML=filtrati.length===0
+    ?`<div style="text-align:center;color:#334155;margin-top:40px;font-size:13px">Niciun pacient găsit</div>`
+    :filtrati.map(p=>{
+      const isUrgent=getLocal(p,"urgent");
+      const dotC=isUrgent?"#f59e0b":"#22c55e";
+      return`<div class="pac-card ${p.telefon===selectedTelefon?'active':''}" onclick="selectPacient('${p.telefon}')">
+        <div class="avatar">${initiale(p.nume)}</div>
+        <div class="pac-info">
+          <div class="pac-name">${p.nume}${isUrgent?' <span style="font-size:10px;color:#f59e0b;background:#1c1200;padding:2px 6px;border-radius:10px;border:1px solid #f59e0b40">URGENT</span>':''}</div>
+          <div class="pac-diag">${p.diagnostic||'—'}</div>
+        </div>
+        <div class="dot" style="background:${dotC};box-shadow:0 0 6px ${dotC}"></div>
+      </div>`;
+    }).join("");
   renderProfil();
 }
-
-function renderProfil() {
-  const pac = pacienti.find(p => p.telefon === selectedTelefon);
-  const content = document.getElementById("content");
-  if (!pac) { content.innerHTML = `<div id="empty">Selectează un pacient</div>`; return; }
-
-  const sr = sedinteLocale[pac.telefon] !== undefined ? sedinteLocale[pac.telefon] : pac.sedinte_ramase;
-  const programari = programariCache[pac.telefon] || [];
-  const sc = dotColor(sr);
-
-  content.innerHTML = `
-    <div id="profil">
-      <div class="profil-header">
-        <div class="avatar-lg">${initiale(pac.nume)}</div>
-        <div>
-          <div class="profil-name">${pac.nume}</div>
-          <div class="profil-sub">Ultima vizită: ${pac.ultima_vizita || '—'}</div>
-          <span class="badge" style="background:#1e293b;color:#93c5fd;border:1px solid #1e3a5f">📞 ${pac.telefon}</span>
-          <span class="badge" style="background:#1e293b;color:#a78bfa;border:1px solid #2e1065">🦴 ${pac.diagnostic || '—'}</span>
+function renderProfil(){
+  const pac=pacienti.find(p=>p.telefon===selectedTelefon);
+  const content=document.getElementById("content");
+  if(!pac){content.innerHTML=`<div id="empty">Selectează un pacient</div>`;return;}
+  const sr=getLocal(pac,"sedinte_ramase");
+  const isUrgent=getLocal(pac,"urgent");
+  const noteVal=getLocal(pac,"note_terapeut");
+  const programari=programariCache[pac.telefon]||[];
+  content.innerHTML=`<div id="profil">
+    <div class="profil-header">
+      <div class="avatar-lg">${initiale(pac.nume)}</div>
+      <div>
+        <div class="profil-name">${pac.nume}</div>
+        <div class="profil-sub">Ultima vizită: ${pac.ultima_vizita||'—'}</div>
+        <span class="badge" style="background:#1e293b;color:#93c5fd;border:1px solid #1e3a5f">📞 ${pac.telefon}</span>
+        <span class="badge" style="background:#1e293b;color:#a78bfa;border:1px solid #2e1065">🦴 ${pac.diagnostic||'—'}</span>
+      </div>
+    </div>
+    <div class="urgent-toggle ${isUrgent?'on':''}" onclick="toggleUrgent()">
+      <div class="toggle-switch ${isUrgent?'on':''}"><div class="toggle-knob"></div></div>
+      <span class="urgent-label">${isUrgent?'⚠ Pacient marcat ca URGENT':'Marchează ca urgent'}</span>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="sedinte-row">
+          <span class="card-label" style="margin:0">ȘEDINȚE RĂMASE</span>
+          <span class="sedinte-num">${sr}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.max(5,100-sr*10)}%"></div></div>
+        <div class="btn-row">
+          <button class="btn-sm" onclick="schimbaSedinte(-1)">−</button>
+          <button class="btn-sm" onclick="schimbaSedinte(1)">+</button>
         </div>
       </div>
-
-      <div class="grid2">
-        <div class="card">
-          <div class="sedinte-row">
-            <span class="card-label" style="margin:0">ȘEDINȚE RĂMASE</span>
-            <span class="sedinte-num" style="color:${sc}">${sr}</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="background:${sc};width:${Math.max(5, 100 - sr * 10)}%"></div></div>
-          <div class="btn-row">
-            <button class="btn-sm" onclick="schimbaSedinte(-1)">−</button>
-            <button class="btn-sm" onclick="schimbaSedinte(1)">+</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-label">PROGRAMĂRI</div>
-          ${programari.length === 0
-            ? `<div style="font-size:13px;color:#475569">Se încarcă...</div>`
-            : programari.slice(0, 4).map(p => `
-                <div class="prog-row">
-                  <span class="prog-data">${p.data}</span>
-                  <span class="prog-ora">${p.ora}</span>
-                </div>`).join("")}
-        </div>
+      <div class="card">
+        <div class="card-label">PROGRAMĂRI</div>
+        ${programari.length===0?`<div style="font-size:13px;color:#475569">Se încarcă...</div>`:programari.slice(0,4).map(p=>`<div class="prog-row"><span class="prog-data">${p.data}</span><span class="prog-ora">${p.ora}</span></div>`).join("")}
       </div>
-
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header">
-          <div class="card-label" style="margin:0">NOTE TERAPEUT</div>
-          <button class="btn-edit" onclick="toggleNote()">${editNote ? "Anulează" : "Editează"}</button>
-        </div>
-        ${editNote
-          ? `<textarea class="note-edit" id="note-input">${pac.note_terapeut || ''}</textarea>`
-          : `<p class="note-text">${pac.note_terapeut || '<span style="color:#334155">Nicio notă adăugată.</span>'}</p>`}
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-label" style="margin:0">NOTE TERAPEUT</div>
+        <button class="btn-edit" onclick="toggleNote()">${editNote?'Anulează':'Editează'}</button>
       </div>
-
-      <button id="btn-save" onclick="salveaza()">Salvează modificările</button>
-    </div>`;
+      ${editNote?`<textarea class="note-edit" id="note-input">${noteVal||''}</textarea>`:`<p class="note-text">${noteVal||'<span style="color:#334155">Nicio notă adăugată.</span>'}</p>`}
+    </div>
+    <button id="btn-save" onclick="salveaza()">Salvează modificările</button>
+  </div>`;
 }
-
-function schimbaSedinte(delta) {
-  const pac = pacienti.find(p => p.telefon === selectedTelefon);
-  if (!pac) return;
-  const cur = sedinteLocale[pac.telefon] !== undefined ? sedinteLocale[pac.telefon] : pac.sedinte_ramase;
-  sedinteLocale[pac.telefon] = Math.max(0, cur + delta);
-  renderProfil();
-  render();
+function toggleUrgent(){const pac=pacienti.find(p=>p.telefon===selectedTelefon);if(!pac)return;setLocal(pac.telefon,"urgent",!getLocal(pac,"urgent"));render();}
+function schimbaSedinte(delta){const pac=pacienti.find(p=>p.telefon===selectedTelefon);if(!pac)return;setLocal(pac.telefon,"sedinte_ramase",Math.max(0,getLocal(pac,"sedinte_ramase")+delta));renderProfil();render();}
+function toggleNote(){editNote=!editNote;renderProfil();}
+async function salveaza(){
+  const pac=pacienti.find(p=>p.telefon===selectedTelefon);if(!pac)return;
+  const note=editNote?(document.getElementById("note-input")?.value||getLocal(pac,"note_terapeut")):getLocal(pac,"note_terapeut");
+  const sr=getLocal(pac,"sedinte_ramase");
+  const urgent=getLocal(pac,"urgent");
+  if(editNote)setLocal(pac.telefon,"note_terapeut",note);
+  try{
+    await fetch(`${API}/pacienti/${encodeURIComponent(pac.telefon)}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({sedinte_ramase:sr,note_terapeut:note,urgent})});
+    pac.sedinte_ramase=sr;pac.note_terapeut=note;pac.urgent=urgent;editNote=false;
+    const btn=document.getElementById("btn-save");
+    btn.textContent="✓ Salvat în Sheets";btn.classList.add("saved");
+    setTimeout(()=>{btn.textContent="Salvează modificările";btn.classList.remove("saved");renderProfil();},2000);
+  }catch(e){alert("Eroare la salvare: "+e.message);}
 }
-
-function toggleNote() {
-  editNote = !editNote;
-  renderProfil();
-}
-
-async function salveaza() {
-  const pac = pacienti.find(p => p.telefon === selectedTelefon);
-  if (!pac) return;
-
-  const note = editNote
-    ? (document.getElementById("note-input")?.value || pac.note_terapeut)
-    : pac.note_terapeut;
-
-  const sr = sedinteLocale[pac.telefon] !== undefined ? sedinteLocale[pac.telefon] : pac.sedinte_ramase;
-
-  try {
-    await fetch(`${API}/pacienti/${encodeURIComponent(pac.telefon)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sedinte_ramase: sr, note_terapeut: note }),
-    });
-
-    // Actualizează local
-    pac.sedinte_ramase = sr;
-    pac.note_terapeut = note;
-    editNote = false;
-
-    const btn = document.getElementById("btn-save");
-    btn.textContent = "✓ Salvat în Sheets";
-    btn.classList.add("saved");
-    setTimeout(() => {
-      btn.textContent = "Salvează modificările";
-      btn.classList.remove("saved");
-      renderProfil();
-    }, 2000);
-  } catch (e) {
-    alert("Eroare la salvare: " + e.message);
-  }
-}
-
 loadPacienti();
 </script>
 </body>
