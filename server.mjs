@@ -8,9 +8,8 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static("public")); // servește crm.html din folderul public/
+app.use(express.static("public"));
 
-// ─── ENV ───────────────────────────────────────────────────────────────────
 const SHEET_ID       = process.env.GOOGLE_SHEET_ID;
 const SHEET_TAB_NAME = process.env.GOOGLE_SHEET_TAB_NAME || "";
 const CLIENT_EMAIL   = process.env.GOOGLE_CLIENT_EMAIL;
@@ -24,21 +23,14 @@ if (!SHEET_ID || !CLIENT_EMAIL || !PRIVATE_KEY) {
   process.exit(1);
 }
 
-// ─── GOOGLE SHEETS SETUP ───────────────────────────────────────────────────
 const doc = new GoogleSpreadsheet(SHEET_ID);
 let cachedSheet = null;
 let sheetInitPromise = null;
 
 const HEADERS = [
-  "full_name",
-  "phone_number",
-  "pain_complaint",
-  "caller_id_number",
-  "has_exact_datetime",
-  "appointment_datetime",
-  "reminder_sent",
-  "sedinte_ramase",
-  "note_terapeut",
+  "full_name", "phone_number", "pain_complaint", "caller_id_number",
+  "has_exact_datetime", "appointment_datetime", "reminder_sent",
+  "sedinte_ramase", "note_terapeut", "urgent",
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -79,7 +71,6 @@ async function getSheet() {
   return sheetInitPromise;
 }
 
-// ─── RECUNOASTERE PACIENT ──────────────────────────────────────────────────
 async function cautaPacientDupaCaller(callerId) {
   if (!callerId) return null;
   try {
@@ -100,7 +91,6 @@ async function cautaPacientDupaCaller(callerId) {
   }
 }
 
-// ─── SMS VIA SMSLINK ───────────────────────────────────────────────────────
 function extrageOra(appointmentDatetime) {
   return appointmentDatetime.match(/T(\d{2}:\d{2})/)?.[1] || appointmentDatetime;
 }
@@ -113,36 +103,21 @@ function normalizeazaTelefon(telefon) {
 }
 
 async function trimiteReminderSMS(telefon, numePacient, dataOra) {
-  if (!SMSLINK_ID || !SMSLINK_PWD) {
-    console.warn("SMSLINK credentials lipsa, SMS netrimis.");
-    return;
-  }
-
+  if (!SMSLINK_ID || !SMSLINK_PWD) { console.warn("SMSLINK credentials lipsa."); return; }
   const telefonNormalizat = normalizeazaTelefon(telefon);
   const ora = extrageOra(dataOra);
-
-  const mesaj =
-    `Juni Performance: Buna ziua, ${numePacient}! Va asteptam maine ` +
-    `la ora ${ora}. Reprogramari: ${CLINIC_PHONE}.`;
-
-  const url =
-    `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
-    `?connection_id=${encodeURIComponent(SMSLINK_ID)}` +
-    `&password=${encodeURIComponent(SMSLINK_PWD)}` +
-    `&to=${encodeURIComponent(telefonNormalizat)}` +
-    `&message=${encodeURIComponent(mesaj)}`;
-
+  const mesaj = `Juni Performance: Buna ziua, ${numePacient}! Va asteptam maine la ora ${ora}. Reprogramari: ${CLINIC_PHONE}.`;
+  const url = `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
+    `?connection_id=${encodeURIComponent(SMSLINK_ID)}&password=${encodeURIComponent(SMSLINK_PWD)}` +
+    `&to=${encodeURIComponent(telefonNormalizat)}&message=${encodeURIComponent(mesaj)}`;
   try {
-    const res  = await fetch(url);
+    const res = await fetch(url);
     const text = await res.text();
     console.log(`SMS -> ${telefonNormalizat}: ${text}`);
     return text;
-  } catch (err) {
-    console.error("Eroare trimitere SMS:", err.message);
-  }
+  } catch (err) { console.error("Eroare trimitere SMS:", err.message); }
 }
 
-// ─── CRON: remindere zilnice la 10:00 ─────────────────────────────────────
 cron.schedule("0 10 * * *", async () => {
   console.log("[CRON] Verificare programari pentru maine...");
   try {
@@ -166,19 +141,14 @@ cron.schedule("0 10 * * *", async () => {
       await sleep(500);
     }
     console.log(`[CRON] Remindere trimise: ${trimise}`);
-  } catch (err) {
-    console.error("[CRON] Eroare:", err.message);
-  }
+  } catch (err) { console.error("[CRON] Eroare:", err.message); }
 });
 
 // ─── CRM API ───────────────────────────────────────────────────────────────
-
-// GET /pacienti — returnează toți pacienții unici (deduplicați după telefon)
 app.get("/pacienti", async (_req, res) => {
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
-
     const map = new Map();
     rows.forEach((row, i) => {
       const telefon = row.get("phone_number") || row.get("caller_id_number") || "";
@@ -190,26 +160,21 @@ app.get("/pacienti", async (_req, res) => {
           diagnostic:           row.get("pain_complaint") || "",
           sedinte_ramase:       parseInt(row.get("sedinte_ramase") || "0"),
           note_terapeut:        row.get("note_terapeut") || "",
+          urgent:               row.get("urgent") === "true",
           appointment_datetime: row.get("appointment_datetime") || "",
           ultima_vizita:        row.get("appointment_datetime")?.split("T")[0] || "",
-          _rowIndex:            i,
         });
       }
     });
-
     res.json(Array.from(map.values()));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /pacienti/:telefon — programările unui pacient
 app.get("/pacienti/:telefon", async (req, res) => {
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
     const tel   = req.params.telefon;
-
     const programari = rows
       .filter(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel)
       .map(r => ({
@@ -217,36 +182,26 @@ app.get("/pacienti/:telefon", async (req, res) => {
         ora:    extrageOra(r.get("appointment_datetime") || ""),
         durere: r.get("pain_complaint") || "",
       }));
-
     res.json(programari);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// PUT /pacienti/:telefon — actualizează sedinte_ramase și note_terapeut
 app.put("/pacienti/:telefon", async (req, res) => {
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
     const tel   = req.params.telefon;
-    const { sedinte_ramase, note_terapeut } = req.body;
-
-    // Actualizează primul rând găsit cu telefonul respectiv
+    const { sedinte_ramase, note_terapeut, urgent } = req.body;
     const row = rows.find(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel);
     if (!row) return res.status(404).json({ error: "Pacient negăsit" });
-
     if (sedinte_ramase !== undefined) row.set("sedinte_ramase", String(sedinte_ramase));
     if (note_terapeut  !== undefined) row.set("note_terapeut", note_terapeut);
+    if (urgent         !== undefined) row.set("urgent", String(urgent));
     await withRetry(() => row.save());
-
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ─── ROUTES ────────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
 app.post("/vapi/webhook", (req, res) => {
@@ -255,10 +210,7 @@ app.post("/vapi/webhook", (req, res) => {
   if (type !== "end-of-call-report") return;
   const structuredData = req.body?.message?.analysis?.structuredData;
   if (!structuredData || typeof structuredData !== "object") return;
-  if (structuredData.has_exact_datetime !== true) {
-    console.log("Skipping row: has_exact_datetime is not true");
-    return;
-  }
+  if (structuredData.has_exact_datetime !== true) { console.log("Skipping row: has_exact_datetime is not true"); return; }
   const call     = req.body?.message?.call;
   const callerId = call?.customer?.number ?? "";
   const row = {
@@ -271,6 +223,7 @@ app.post("/vapi/webhook", (req, res) => {
     reminder_sent:        "false",
     sedinte_ramase:       "",
     note_terapeut:        "",
+    urgent:               "false",
   };
   (async () => {
     try {
@@ -294,7 +247,6 @@ app.post("/vapi/webhook", (req, res) => {
   })();
 });
 
-// ─── TEST REMINDERS ────────────────────────────────────────────────────────
 app.get("/test-reminders", async (_req, res) => {
   try {
     const sheet = await getSheet();
@@ -317,11 +269,8 @@ app.get("/test-reminders", async (_req, res) => {
       await sleep(500);
     }
     res.json({ success: true, trimise });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ─── START ─────────────────────────────────────────────────────────────────
 const PORT = Number(process.env.PORT || 10000);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
