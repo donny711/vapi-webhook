@@ -310,6 +310,46 @@ app.post("/vapi/webhook", async (req, res) => {
   })();
 });
 
+// ─── VAPI TOOL CALL: verifica pacient ─────────────────────────────────────
+app.post("/verifica-pacient", async (req, res) => {
+  try {
+    const toolCallId = req.body?.message?.toolCallList?.[0]?.id || "";
+    const args       = req.body?.message?.toolCallList?.[0]?.function?.arguments || {};
+    const telefon    = args.telefon || req.body?.message?.call?.customer?.number || "";
+
+    const sheet = await getSheet();
+    const rows  = await sheet.getRows();
+
+    const toate = rows.filter(r =>
+      normalizeazaTelefon(r.get("phone_number") || r.get("caller_id_number") || "") ===
+      normalizeazaTelefon(telefon)
+    );
+
+    if (toate.length === 0) {
+      return res.json({ results: [{ toolCallId, result: JSON.stringify({ recurent: false }) }] });
+    }
+
+    const found = toate.sort((a, b) =>
+      new Date(b.get("appointment_datetime") || 0) - new Date(a.get("appointment_datetime") || 0)
+    )[0];
+
+    const result = {
+      recurent:      true,
+      nume:          found.get("full_name") || "",
+      diagnostic:    found.get("pain_complaint") || "",
+      tip_serviciu:  found.get("tip_serviciu") || "fizioterapie",
+      ultima_vizita: found.get("appointment_datetime")?.split("T")[0] || "",
+      nr_vizite:     toate.length,
+    };
+
+    console.log(`Tool verifica_pacient: ${result.nume} (${telefon}) — ${result.tip_serviciu}`);
+    res.json({ results: [{ toolCallId, result: JSON.stringify(result) }] });
+  } catch (err) {
+    console.error("Eroare verifica-pacient:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── TEST REMINDERS ────────────────────────────────────────────────────────
 app.get("/test-reminders", async (_req, res) => {
   try {
