@@ -71,11 +71,12 @@ async function getSheet() {
   return sheetInitPromise;
 }
 
+// ─── RECUNOASTERE PACIENT ──────────────────────────────────────────────────
 async function cautaPacientDupaCaller(callerId) {
   if (!callerId) return null;
   try {
     const sheet = await getSheet();
-    const rows = await sheet.getRows();
+    const rows  = await sheet.getRows();
     const found = rows.find(
       (r) => r.get("caller_id_number") === callerId || r.get("phone_number") === callerId
     );
@@ -84,6 +85,7 @@ async function cautaPacientDupaCaller(callerId) {
       full_name:            found.get("full_name"),
       pain_complaint:       found.get("pain_complaint"),
       appointment_datetime: found.get("appointment_datetime"),
+      tip_serviciu:         found.get("tip_serviciu") || "fizioterapie",
     };
   } catch (err) {
     console.error("Eroare cautare pacient:", err.message);
@@ -91,9 +93,8 @@ async function cautaPacientDupaCaller(callerId) {
   }
 }
 
-function extrageOra(appointmentDatetime) {
-  return appointmentDatetime.match(/T(\d{2}:\d{2})/)?.[1] || appointmentDatetime;
-}
+// ─── SMS ───────────────────────────────────────────────────────────────────
+function extrageOra(dt) { return dt.match(/T(\d{2}:\d{2})/)?.[1] || dt; }
 
 function normalizeazaTelefon(telefon) {
   let t = telefon.replace(/\D/g, "");
@@ -104,20 +105,20 @@ function normalizeazaTelefon(telefon) {
 
 async function trimiteReminderSMS(telefon, numePacient, dataOra) {
   if (!SMSLINK_ID || !SMSLINK_PWD) { console.warn("SMSLINK credentials lipsa."); return; }
-  const telefonNormalizat = normalizeazaTelefon(telefon);
+  const tel = normalizeazaTelefon(telefon);
   const ora = extrageOra(dataOra);
   const mesaj = `Juni Performance: Buna ziua, ${numePacient}! Va asteptam maine la ora ${ora}. Reprogramari: ${CLINIC_PHONE}.`;
   const url = `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
     `?connection_id=${encodeURIComponent(SMSLINK_ID)}&password=${encodeURIComponent(SMSLINK_PWD)}` +
-    `&to=${encodeURIComponent(telefonNormalizat)}&message=${encodeURIComponent(mesaj)}`;
+    `&to=${encodeURIComponent(tel)}&message=${encodeURIComponent(mesaj)}`;
   try {
-    const res = await fetch(url);
+    const res  = await fetch(url);
     const text = await res.text();
-    console.log(`SMS -> ${telefonNormalizat}: ${text}`);
-    return text;
-  } catch (err) { console.error("Eroare trimitere SMS:", err.message); }
+    console.log(`SMS -> ${tel}: ${text}`);
+  } catch (err) { console.error("Eroare SMS:", err.message); }
 }
 
+// ─── CRON ──────────────────────────────────────────────────────────────────
 cron.schedule("0 10 * * *", async () => {
   console.log("[CRON] Verificare programari pentru maine...");
   try {
@@ -128,13 +129,13 @@ cron.schedule("0 10 * * *", async () => {
     const dataMaine = maine.toISOString().split("T")[0];
     let trimise = 0;
     for (const row of rows) {
-      const appointmentDatetime = row.get("appointment_datetime") || "";
-      const reminderSent        = row.get("reminder_sent") || "";
-      const telefon             = row.get("phone_number") || row.get("caller_id_number") || "";
-      const numePacient         = row.get("full_name") || "pacient";
-      if (!appointmentDatetime || reminderSent === "true") continue;
-      if (!appointmentDatetime.includes(dataMaine)) continue;
-      await trimiteReminderSMS(telefon, numePacient, appointmentDatetime);
+      const dt          = row.get("appointment_datetime") || "";
+      const reminderSent = row.get("reminder_sent") || "";
+      const telefon     = row.get("phone_number") || row.get("caller_id_number") || "";
+      const nume        = row.get("full_name") || "pacient";
+      if (!dt || reminderSent === "true") continue;
+      if (!dt.includes(dataMaine)) continue;
+      await trimiteReminderSMS(telefon, nume, dt);
       row.set("reminder_sent", "true");
       await withRetry(() => row.save());
       trimise++;
@@ -144,11 +145,12 @@ cron.schedule("0 10 * * *", async () => {
   } catch (err) { console.error("[CRON] Eroare:", err.message); }
 });
 
+// ─── CRM API ───────────────────────────────────────────────────────────────
 app.get("/pacienti", async (_req, res) => {
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
-    const map = new Map();
+    const map   = new Map();
     rows.forEach((row, i) => {
       const telefon = row.get("phone_number") || row.get("caller_id_number") || "";
       if (!map.has(telefon)) {
@@ -203,17 +205,65 @@ app.put("/pacienti/:telefon", async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ─── ROUTES ────────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => res.status(200).send("ok"));
 
-app.post("/vapi/webhook", (req, res) => {
-  res.sendStatus(200);
-  const type = req.body?.message?.type;
-  if (type !== "end-of-call-report") return;
-  const structuredData = req.body?.message?.analysis?.structuredData;
-  if (!structuredData || typeof structuredData !== "object") return;
-  if (structuredData.has_exact_datetime !== true) { console.log("Skipping row: has_exact_datetime is not true"); return; }
+app.post("/vapi/webhook", async (req, res) => {
+  const type     = req.body?.message?.type;
   const call     = req.body?.message?.call;
   const callerId = call?.customer?.number ?? "";
+
+  // ── Recunoaștere pacient la începutul apelului ──────────────────────────
+  if (type === "assistant-request") {
+    res.setHeader("Content-Type", "application/json");
+    try {
+      const pacient = await cautaPacientDupaCaller(callerId);
+
+      if (!pacient) {
+        return res.json({
+          assistant: {
+            firstMessage: "Buna ziua! Ati sunat la Juni Performance. Cu ce va pot ajuta?"
+          }
+        });
+      }
+
+      const tip  = pacient.tip_serviciu || "fizioterapie";
+      const nume = pacient.full_name?.split(" ")[0] || "";
+      const dataEval = pacient.appointment_datetime ? new Date(pacient.appointment_datetime) : null;
+      const eEvaluareFinalizata = tip === "evaluare" && dataEval && dataEval < new Date();
+
+      let firstMessage;
+      if (eEvaluareFinalizata) {
+        firstMessage = `Bine ai revenit, ${nume}! Cum a decurs evaluarea? Vrei sa programam o sedinta de fizioterapie sau kinetoterapie?`;
+      } else {
+        firstMessage = `Bine ai revenit, ${nume}! Ai nevoie de informatii sau vrei sa programam urmatoarea sedinta de ${tip}?`;
+      }
+
+      console.log(`Pacient recunoscut la apel: ${pacient.full_name} (${callerId}) — ${tip}`);
+      return res.json({ assistant: { firstMessage } });
+
+    } catch (err) {
+      console.error("Eroare assistant-request:", err.message);
+      return res.json({
+        assistant: {
+          firstMessage: "Buna ziua! Ati sunat la Juni Performance. Cu ce va pot ajuta?"
+        }
+      });
+    }
+  }
+
+  // ── End of call report ──────────────────────────────────────────────────
+  res.sendStatus(200);
+
+  if (type !== "end-of-call-report") return;
+
+  const structuredData = req.body?.message?.analysis?.structuredData;
+  if (!structuredData || typeof structuredData !== "object") return;
+  if (structuredData.has_exact_datetime !== true) {
+    console.log("Skipping row: has_exact_datetime is not true");
+    return;
+  }
+
   const row = {
     full_name:            structuredData.full_name ?? "",
     phone_number:         callerId || structuredData.phone_number || "",
@@ -227,11 +277,12 @@ app.post("/vapi/webhook", (req, res) => {
     urgent:               "false",
     tip_serviciu:         structuredData.tip_serviciu ?? "fizioterapie",
   };
+
   (async () => {
     try {
       const pacientExistent = await cautaPacientDupaCaller(callerId);
       if (pacientExistent) {
-        console.log(`Pacient recurent recunoscut: ${pacientExistent.full_name} (${callerId})`);
+        console.log(`Pacient recurent: ${pacientExistent.full_name} (${callerId})`);
       } else {
         console.log(`Pacient nou: ${row.full_name} (${callerId})`);
       }
@@ -241,14 +292,15 @@ app.post("/vapi/webhook", (req, res) => {
     } catch (err) {
       const msg = err?.message || err;
       if (String(msg).includes("The caller does not have permission")) {
-        console.error("Permission error: share the Google Sheet with GOOGLE_CLIENT_EMAIL as Editor.");
+        console.error("Permission error: share Sheet with GOOGLE_CLIENT_EMAIL as Editor.");
         return;
       }
-      console.error("Eroare scriere in Google Sheet:", msg);
+      console.error("Eroare scriere Sheet:", msg);
     }
   })();
 });
 
+// ─── TEST REMINDERS ────────────────────────────────────────────────────────
 app.get("/test-reminders", async (_req, res) => {
   try {
     const sheet = await getSheet();
@@ -258,13 +310,13 @@ app.get("/test-reminders", async (_req, res) => {
     const dataMaine = maine.toISOString().split("T")[0];
     let trimise = 0;
     for (const row of rows) {
-      const appointmentDatetime = row.get("appointment_datetime") || "";
-      const reminderSent        = row.get("reminder_sent") || "";
-      const telefon             = row.get("phone_number") || row.get("caller_id_number") || "";
-      const numePacient         = row.get("full_name") || "pacient";
-      if (!appointmentDatetime || reminderSent === "true") continue;
-      if (!appointmentDatetime.includes(dataMaine)) continue;
-      await trimiteReminderSMS(telefon, numePacient, appointmentDatetime);
+      const dt          = row.get("appointment_datetime") || "";
+      const reminderSent = row.get("reminder_sent") || "";
+      const telefon     = row.get("phone_number") || row.get("caller_id_number") || "";
+      const nume        = row.get("full_name") || "pacient";
+      if (!dt || reminderSent === "true") continue;
+      if (!dt.includes(dataMaine)) continue;
+      await trimiteReminderSMS(telefon, nume, dt);
       row.set("reminder_sent", "true");
       await withRetry(() => row.save());
       trimise++;
@@ -274,5 +326,6 @@ app.get("/test-reminders", async (_req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ─── START ─────────────────────────────────────────────────────────────────
 const PORT = Number(process.env.PORT || 10000);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
