@@ -3,154 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Kinetics — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>KINETICS — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
-  :root{
-    --bg:#f7f5f0;
-    --surface:#ffffff;
-    --border:#e8e4dc;
-    --text:#1a1714;
-    --muted:#8c8680;
-    --accent:#c8502a;
-    --accent2:#2a5fc8;
-    --green:#1a7a4a;
-    --amber:#b8860b;
-  }
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
-  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  body{background:#020817;color:#e2e8f0;font-family:'DM Sans',sans-serif;min-height:100vh;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#1e293b;border-radius:4px;}
+  input,button{font-family:'DM Sans',sans-serif;}
 
-  header{
-    background:var(--surface);border-bottom:1px solid var(--border);
-    padding:16px 24px;display:flex;align-items:center;justify-content:space-between;
-    position:sticky;top:0;z-index:10;
-  }
-  .logo{display:flex;align-items:center;gap:12px;}
-  .logo-mark{
-    width:36px;height:36px;background:var(--text);border-radius:8px;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--bg);letter-spacing:-0.5px;
-  }
-  .logo-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.5px;}
-  .logo-tag{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px;}
-  #clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);text-align:right;}
-  #date-str{font-size:11px;color:var(--muted);margin-top:2px;}
-
-  #refresh-btn{
-    padding:8px 16px;border-radius:8px;border:1px solid var(--border);
-    background:var(--surface);font-size:12px;cursor:pointer;
-    font-family:'DM Sans',sans-serif;color:var(--muted);
-    display:flex;align-items:center;gap:6px;margin-left:16px;
-  }
-  #refresh-btn:hover{background:var(--bg);}
+  #topbar{height:56px;border-bottom:1px solid #0f172a;display:flex;align-items:center;padding:0 24px;gap:16px;background:#020817;position:sticky;top:0;z-index:10;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#f1f5f9;font-weight:700;}
+  .logo-tag{font-size:11px;color:#334155;margin-left:4px;letter-spacing:1px;text-transform:uppercase;}
+  #clock-wrap{margin-left:auto;text-align:right;}
+  #clock{font-family:'DM Mono',monospace;font-size:15px;color:#e2e8f0;}
+  #date-str{font-size:11px;color:#475569;margin-top:2px;}
+  #refresh-btn{padding:7px 14px;border-radius:8px;border:1px solid #1e293b;background:transparent;font-size:12px;cursor:pointer;color:#64748b;display:flex;align-items:center;gap:6px;margin-left:16px;}
+  #refresh-btn:hover{background:#0f172a;color:#e2e8f0;}
 
   .page{padding:24px;}
 
-  /* Stats row */
+  /* Stats */
   .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-  .stat-card{
-    background:var(--surface);border:1px solid var(--border);border-radius:16px;
-    padding:20px 22px;position:relative;overflow:hidden;
-  }
-  .stat-card::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:3px;
-    background:var(--accent-color,var(--text));
-  }
-  .stat-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
-  .stat-value{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1;letter-spacing:-1px;}
-  .stat-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+  .stat-card{background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;}
+  .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac);}
+  .stat-label{font-size:11px;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:'DM Mono',monospace;}
+  .stat-value{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;line-height:1;color:#f1f5f9;}
+  .stat-sub{font-size:12px;color:#475569;margin-top:8px;}
 
-  /* Main grid */
+  /* Grid principal */
   .main-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
 
-  /* Cards */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-  .card-header{
-    padding:16px 20px;border-bottom:1px solid var(--border);
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-0.3px;}
-  .card-body{padding:0;}
+  /* Card generic */
+  .card{background:#0f172a;border:1px solid #1e293b;border-radius:14px;overflow:hidden;margin-bottom:16px;}
+  .card:last-child{margin-bottom:0;}
+  .card-header{padding:14px 20px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;}
+  .card-title{font-size:13px;font-weight:600;color:#94a3b8;letter-spacing:0.5px;font-family:'DM Mono',monospace;text-transform:uppercase;}
 
-  /* Programări */
-  .prog-item{
-    padding:14px 20px;border-bottom:1px solid var(--border);
-    display:flex;align-items:center;gap:14px;
-    transition:background 0.15s;
+  /* Pacient următor */
+  .next-wrap{padding:16px 20px 0;}
+  .next-card{
+    background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);
+    border:1px solid #334155;border-radius:12px;padding:16px 20px;
+    display:flex;align-items:center;gap:16px;
   }
+  .next-avatar{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1e3a5f,#2d5986);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#93c5fd;font-family:'DM Mono',monospace;flex-shrink:0;}
+  .next-label{font-size:10px;color:#475569;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+  .next-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#f1f5f9;}
+  .next-detail{font-size:12px;color:#64748b;margin-top:2px;}
+  .next-time-wrap{margin-left:auto;text-align:right;flex-shrink:0;}
+  .next-time{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:#3b82f6;}
+  .next-min{font-size:11px;color:#475569;margin-top:2px;}
+
+  /* Lista programări */
+  .prog-item{padding:13px 20px;border-bottom:1px solid #0f172a;display:flex;align-items:center;gap:12px;transition:background 0.15s;}
   .prog-item:last-child{border-bottom:none;}
-  .prog-item:hover{background:var(--bg);}
-  .prog-item.acum{background:#fff8f5;border-left:3px solid var(--accent);}
-  .prog-time{
-    font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
-    color:var(--text);min-width:48px;
-  }
-  .prog-time.past{color:var(--muted);}
-  .prog-avatar{
-    width:36px;height:36px;border-radius:10px;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
-  }
+  .prog-item:hover{background:#0f172a60;}
+  .prog-item.acum{background:#0c1a2e;border-left:2px solid #3b82f6;}
+  .prog-time{font-family:'DM Mono',monospace;font-size:14px;color:#e2e8f0;min-width:46px;flex-shrink:0;}
+  .prog-time.past{color:#334155;}
+  .prog-avatar{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
   .prog-info{flex:1;min-width:0;}
-  .prog-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .prog-diag{font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .prog-badge{
-    font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;
-    white-space:nowrap;flex-shrink:0;
-  }
-  .badge-fizio{background:#e8f0ff;color:#2a5fc8;}
-  .badge-kineto{background:#f0e8ff;color:#6a2ac8;}
-  .badge-evaluare{background:#e8fff0;color:#1a7a4a;}
-  .badge-acum{background:#fff0ec;color:var(--accent);}
+  .prog-name{font-size:13px;font-weight:500;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .prog-diag{font-size:11px;color:#475569;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .prog-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+  .badge-fizio{background:#0c1a3a;color:#93c5fd;border:1px solid #1e3a5f;}
+  .badge-kineto{background:#1a0c3a;color:#c4b5fd;border:1px solid #2e1065;}
+  .badge-evaluare{background:#0c2a1e;color:#6ee7b7;border:1px solid #064e3b;}
+  .badge-acum{background:#1e3a5f;color:#3b82f6;border:1px solid #2563eb40;}
 
-  /* Pacient următor highlight */
-  .next-patient{
-    margin:0 20px 16px;padding:16px;
-    background:linear-gradient(135deg,#1a1714 0%,#2d2926 100%);
-    border-radius:12px;color:#fff;
-    display:flex;align-items:center;gap:14px;
-  }
-  .next-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9a9590;margin-bottom:4px;}
-  .next-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
-  .next-detail{font-size:12px;color:#9a9590;margin-top:2px;}
-  .next-time{
-    margin-left:auto;font-family:'DM Mono',monospace;
-    font-size:28px;font-weight:500;color:#fff;text-align:right;flex-shrink:0;
-  }
-  .next-time-label{font-size:10px;color:#9a9590;text-align:right;margin-top:2px;}
+  /* Săptămână */
+  .week-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px;}
+  .week-stat{background:#020817;border:1px solid #1e293b;border-radius:10px;padding:14px 16px;}
+  .week-label{font-size:10px;color:#475569;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px;}
+  .week-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#f1f5f9;}
 
-  /* Stats săptămână */
-  .week-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px;}
-  .week-stat{
-    background:var(--bg);border-radius:12px;padding:14px 16px;
-  }
-  .week-stat-label{font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;}
-  .week-stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;}
-
-  /* Nou vs recurent */
-  .pie-section{padding:16px 20px;}
-  .pie-bar{height:10px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:12px;}
-  .pie-new{background:var(--accent);height:100%;}
-  .pie-rec{background:var(--accent2);height:100%;}
-  .pie-legend{display:flex;gap:16px;}
-  .pie-item{display:flex;align-items:center;gap:6px;font-size:12px;}
-  .pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-
-  /* Zile săptămână */
+  /* Grafic zile */
   .days-section{padding:0 20px 16px;}
   .days-row{display:flex;gap:6px;}
   .day-col{flex:1;text-align:center;}
-  .day-label{font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}
-  .day-bar-wrap{height:60px;display:flex;align-items:flex-end;justify-content:center;}
-  .day-bar{width:100%;border-radius:4px 4px 0 0;background:var(--accent2);opacity:0.7;min-height:4px;transition:height 0.4s;}
-  .day-bar.today{opacity:1;background:var(--accent);}
-  .day-count{font-size:11px;font-family:'DM Mono',monospace;margin-top:4px;color:var(--text);}
+  .day-label{font-size:10px;color:#334155;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;font-family:'DM Mono',monospace;}
+  .day-bar-wrap{height:56px;display:flex;align-items:flex-end;justify-content:center;}
+  .day-bar{width:100%;border-radius:4px 4px 0 0;background:#1e293b;min-height:4px;transition:height 0.4s;}
+  .day-bar.today{background:#3b82f6;}
+  .day-count{font-size:11px;font-family:'DM Mono',monospace;margin-top:4px;color:#475569;}
+  .day-count.today{color:#3b82f6;}
 
-  .empty-state{padding:32px;text-align:center;color:var(--muted);font-size:13px;}
+  /* Pie */
+  .pie-section{padding:16px 20px;}
+  .pie-bar{height:6px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:12px;background:#1e293b;}
+  .pie-new{background:#3b82f6;height:100%;}
+  .pie-rec{background:#8b5cf6;height:100%;}
+  .pie-legend{display:flex;gap:16px;}
+  .pie-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;}
+  .pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty{padding:24px;text-align:center;color:#334155;font-size:13px;}
 
   @media(max-width:900px){
     .stats-grid{grid-template-columns:repeat(2,1fr);}
@@ -160,43 +113,40 @@
 </head>
 <body>
 
-<header>
+<div id="topbar">
   <div class="logo">
-    <div class="logo-mark">K</div>
-    <div>
-      <div class="logo-name">Kinetics</div>
-      <div class="logo-tag">Dashboard Live</div>
-    </div>
+    <div class="logo-icon">🏥</div>
+    <span class="logo-name">Kinetics</span>
+    <span class="logo-tag">Dashboard Live</span>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <div>
-      <div id="clock"></div>
-      <div id="date-str"></div>
-    </div>
-    <button id="refresh-btn" onclick="loadData()">
-      <span id="refresh-icon">↻</span> Actualizează
-    </button>
+  <div id="clock-wrap">
+    <div id="clock">00:00:00</div>
+    <div id="date-str"></div>
   </div>
-</header>
+  <button id="refresh-btn" onclick="loadData()">
+    <span id="ref-icon" style="display:inline-block">↻</span> Actualizează
+  </button>
+</div>
 
 <div class="page">
-  <div class="stats-grid" id="stats-grid">
-    <div class="stat-card" style="--accent-color:var(--accent)">
+
+  <div class="stats-grid">
+    <div class="stat-card" style="--ac:#3b82f6">
       <div class="stat-label">Programări azi</div>
       <div class="stat-value" id="s-azi">—</div>
       <div class="stat-sub" id="s-azi-sub">se încarcă...</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--accent2)">
+    <div class="stat-card" style="--ac:#22c55e">
       <div class="stat-label">Pacienți noi săpt.</div>
       <div class="stat-value" id="s-noi">—</div>
-      <div class="stat-sub" id="s-noi-sub">vs săptămâna trecută</div>
+      <div class="stat-sub" id="s-noi-sub">această săptămână</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--green)">
+    <div class="stat-card" style="--ac:#8b5cf6">
       <div class="stat-label">Pacienți recurenți</div>
       <div class="stat-value" id="s-rec">—</div>
       <div class="stat-sub" id="s-rec-sub">din total</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--amber)">
+    <div class="stat-card" style="--ac:#f59e0b">
       <div class="stat-label">Urgențe active</div>
       <div class="stat-value" id="s-urg">—</div>
       <div class="stat-sub">marcate în CRM</div>
@@ -204,44 +154,39 @@
   </div>
 
   <div class="main-grid">
-    <!-- Programări azi -->
+
     <div>
       <div class="card">
         <div class="card-header">
-          <span class="card-title">📅 Programări de azi</span>
-          <span style="font-size:12px;color:var(--muted)"><span class="live-dot"></span>Live</span>
+          <span class="card-title">Programări de azi</span>
+          <span style="font-size:12px;color:#475569"><span class="live-dot"></span>Live</span>
         </div>
-        <div id="next-patient-wrap"></div>
-        <div class="card-body" id="prog-list">
-          <div class="empty-state">Se încarcă...</div>
-        </div>
+        <div id="next-wrap"></div>
+        <div id="prog-list"><div class="empty">Se încarcă...</div></div>
       </div>
     </div>
 
-    <!-- Coloana dreapta -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
-
-      <!-- Statistici săptămână -->
+    <div>
       <div class="card">
         <div class="card-header">
-          <span class="card-title">📊 Săptămâna aceasta</span>
+          <span class="card-title">Săptămâna aceasta</span>
         </div>
-        <div class="week-grid" id="week-grid">
+        <div class="week-grid">
           <div class="week-stat">
-            <div class="week-stat-label">Total programări</div>
-            <div class="week-stat-val" id="w-total">—</div>
+            <div class="week-label">Total</div>
+            <div class="week-val" id="w-total">—</div>
           </div>
           <div class="week-stat">
-            <div class="week-stat-label">Evaluări</div>
-            <div class="week-stat-val" id="w-eval">—</div>
+            <div class="week-label">Evaluări</div>
+            <div class="week-val" id="w-eval">—</div>
           </div>
           <div class="week-stat">
-            <div class="week-stat-label">Fizioterapie</div>
-            <div class="week-stat-val" id="w-fizio">—</div>
+            <div class="week-label">Fizioterapie</div>
+            <div class="week-val" id="w-fizio">—</div>
           </div>
           <div class="week-stat">
-            <div class="week-stat-label">Kinetoterapie</div>
-            <div class="week-stat-val" id="w-kineto">—</div>
+            <div class="week-label">Kinetoterapie</div>
+            <div class="week-val" id="w-kineto">—</div>
           </div>
         </div>
         <div class="days-section">
@@ -249,10 +194,9 @@
         </div>
       </div>
 
-      <!-- Nou vs Recurent -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">👥 Pacienți noi vs recurenți</span>
+          <span class="card-title">Noi vs Recurenți</span>
         </div>
         <div class="pie-section">
           <div class="pie-bar" id="pie-bar">
@@ -260,210 +204,172 @@
             <div class="pie-rec" style="width:50%"></div>
           </div>
           <div class="pie-legend">
-            <div class="pie-item">
-              <div class="pie-dot" style="background:var(--accent)"></div>
-              <span id="pie-new-label">Noi: —</span>
-            </div>
-            <div class="pie-item">
-              <div class="pie-dot" style="background:var(--accent2)"></div>
-              <span id="pie-rec-label">Recurenți: —</span>
-            </div>
+            <div class="pie-item"><div class="pie-dot" style="background:#3b82f6"></div><span id="pie-new-label">Noi: —</span></div>
+            <div class="pie-item"><div class="pie-dot" style="background:#8b5cf6"></div><span id="pie-rec-label">Recurenți: —</span></div>
           </div>
         </div>
       </div>
-
     </div>
+
   </div>
 </div>
 
 <script>
-const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? "https://vapi-webhook-pcnp.onrender.com" : "";
-
-const ZILE = ["Dum","Lun","Mar","Mie","Joi","Vin","Sâm"];
-const ZILE_FULL = ["Duminică","Luni","Marți","Miercuri","Joi","Vineri","Sâmbătă"];
+const API=window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"?"https://vapi-webhook-pcnp.onrender.com":"";
 
 function initiale(n){return(n||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();}
 
-function avatarColors(tip){
-  if(tip==="kinetoterapie") return "background:#f0e8ff;color:#6a2ac8";
-  if(tip==="evaluare") return "background:#e8fff0;color:#1a7a4a";
-  return "background:#e8f0ff;color:#2a5fc8";
+function avatarStyle(tip){
+  if(tip==="kinetoterapie")return"background:linear-gradient(135deg,#1a0c3a,#2e1065);color:#c4b5fd";
+  if(tip==="evaluare")return"background:linear-gradient(135deg,#0c2a1e,#064e3b);color:#6ee7b7";
+  return"background:linear-gradient(135deg,#1e3a5f,#2d5986);color:#93c5fd";
 }
 
 function tipBadge(tip){
-  if(tip==="kinetoterapie") return `<span class="prog-badge badge-kineto">Kineto</span>`;
-  if(tip==="evaluare") return `<span class="prog-badge badge-evaluare">Evaluare</span>`;
-  return `<span class="prog-badge badge-fizio">Fizio</span>`;
+  if(tip==="kinetoterapie")return`<span class="prog-badge badge-kineto">Kineto</span>`;
+  if(tip==="evaluare")return`<span class="prog-badge badge-evaluare">Evaluare</span>`;
+  return`<span class="prog-badge badge-fizio">Fizio</span>`;
 }
 
 function updateClock(){
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,"0");
-  const m = String(now.getMinutes()).padStart(2,"0");
-  const s = String(now.getSeconds()).padStart(2,"0");
-  document.getElementById("clock").textContent = `${h}:${m}:${s}`;
-  const zi = ZILE_FULL[now.getDay()];
-  const data = now.toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"});
-  document.getElementById("date-str").textContent = `${zi}, ${data}`;
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,"0");
+  const m=String(now.getMinutes()).padStart(2,"0");
+  const s=String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("clock").textContent=`${h}:${m}:${s}`;
+  const zile=["Duminică","Luni","Marți","Miercuri","Joi","Vineri","Sâmbătă"];
+  document.getElementById("date-str").textContent=`${zile[now.getDay()]}, ${now.toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"})}`;
 }
-
-setInterval(updateClock, 1000);
-updateClock();
+setInterval(updateClock,1000);updateClock();
 
 async function loadData(){
-  document.getElementById("refresh-icon").style.animation="spin 0.6s linear";
-  try {
-    const res = await fetch(`${API}/pacienti`);
-    const pacienti = await res.json();
+  const icon=document.getElementById("ref-icon");
+  icon.style.animation="spin 0.6s linear infinite";
+  try{
+    const res=await fetch(`${API}/pacienti`);
+    const pacienti=await res.json();
+    const now=new Date();
+    const azi=now.toISOString().split("T")[0];
 
-    const now = new Date();
-    const azi = now.toISOString().split("T")[0];
+    // Săptămâna curentă
+    const dow=now.getDay();
+    const monday=new Date(now);
+    monday.setDate(now.getDate()-(dow===0?6:dow-1));monday.setHours(0,0,0,0);
+    const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);sunday.setHours(23,59,59,999);
 
-    // Săptămâna curentă (luni-duminică)
-    const dayOfWeek = now.getDay();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    monday.setHours(0,0,0,0);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23,59,59,999);
+    // Programări azi
+    const progAzi=pacienti
+      .filter(p=>(p.appointment_datetime||"").split("T")[0]===azi)
+      .sort((a,b)=>(a.appointment_datetime||"").localeCompare(b.appointment_datetime||""));
 
-    // Programări de azi
-    const programariAzi = pacienti.filter(p => {
-      const d = (p.appointment_datetime||"").split("T")[0];
-      return d === azi;
-    }).sort((a,b) => {
-      const ta = a.appointment_datetime || "";
-      const tb = b.appointment_datetime || "";
-      return ta.localeCompare(tb);
+    // Programări săptămâna
+    const progSapt=pacienti.filter(p=>{
+      const d=new Date(p.appointment_datetime||0);
+      return d>=monday&&d<=sunday;
     });
 
-    // Programări săptămâna aceasta
-    const programariSapt = pacienti.filter(p => {
-      const d = new Date(p.appointment_datetime||0);
-      return d >= monday && d <= sunday;
-    });
+    // Noi vs recurenți (simplu: unici în această săptămână)
+    const telefoneSapt=new Set(progSapt.map(p=>p.telefon));
+    const nouiCount=[...telefoneSapt].filter(t=>
+      pacienti.filter(p=>p.telefon===t).length===1
+    ).length;
+    const recurentiCount=pacienti.length-nouiCount;
+    const urgente=pacienti.filter(p=>p.urgent).length;
 
     // Stats
-    const urgente = pacienti.filter(p => p.urgent).length;
-    const noi = pacienti.filter(p => {
-      const d = new Date(p.appointment_datetime||0);
-      return d >= monday && d <= sunday;
-    });
-    const nouiCount = noi.filter(p => {
-      // pacient "nou" dacă are o singură apariție
-      return pacienti.filter(x => x.telefon === p.telefon).length === 1;
-    }).length;
-    const recurentiCount = pacienti.length - nouiCount;
+    document.getElementById("s-azi").textContent=progAzi.length;
+    document.getElementById("s-azi-sub").textContent=`din care ${progAzi.filter(p=>(p.tip_serviciu||"")==="evaluare").length} evaluări`;
+    document.getElementById("s-noi").textContent=nouiCount;
+    document.getElementById("s-rec").textContent=recurentiCount;
+    document.getElementById("s-rec-sub").textContent=`din ${pacienti.length} total`;
+    document.getElementById("s-urg").textContent=urgente;
 
-    document.getElementById("s-azi").textContent = programariAzi.length;
-    document.getElementById("s-azi-sub").textContent = programariAzi.length === 0 ? "nicio programare" : `din care ${programariAzi.filter(p=>(p.tip_serviciu||"fizioterapie")==="evaluare").length} evaluări`;
-    document.getElementById("s-noi").textContent = nouiCount;
-    document.getElementById("s-rec").textContent = recurentiCount;
-    document.getElementById("s-rec-sub").textContent = `din ${pacienti.length} total`;
-    document.getElementById("s-urg").textContent = urgente;
+    // Săptămână
+    document.getElementById("w-total").textContent=progSapt.length;
+    document.getElementById("w-eval").textContent=progSapt.filter(p=>(p.tip_serviciu||"")==="evaluare").length;
+    document.getElementById("w-fizio").textContent=progSapt.filter(p=>(p.tip_serviciu||"fizioterapie")==="fizioterapie").length;
+    document.getElementById("w-kineto").textContent=progSapt.filter(p=>(p.tip_serviciu||"")==="kinetoterapie").length;
 
-    // Statistici săptămână
-    document.getElementById("w-total").textContent = programariSapt.length;
-    document.getElementById("w-eval").textContent = programariSapt.filter(p=>(p.tip_serviciu||"")===("evaluare")).length;
-    document.getElementById("w-fizio").textContent = programariSapt.filter(p=>(p.tip_serviciu||"fizioterapie")==="fizioterapie").length;
-    document.getElementById("w-kineto").textContent = programariSapt.filter(p=>(p.tip_serviciu||"")==="kinetoterapie").length;
-
-    // Grafic zile săptămână
-    const countPerDay = [0,0,0,0,0,0,0]; // lun-dum
-    programariSapt.forEach(p => {
-      const d = new Date(p.appointment_datetime||0);
-      const dow = d.getDay(); // 0=dum
-      const idx = dow === 0 ? 6 : dow - 1;
+    // Grafic zile
+    const countPerDay=[0,0,0,0,0,0,0];
+    progSapt.forEach(p=>{
+      const d=new Date(p.appointment_datetime||0);
+      const idx=d.getDay()===0?6:d.getDay()-1;
       countPerDay[idx]++;
     });
-    const maxDay = Math.max(...countPerDay, 1);
-    const todayIdx = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const dayLabels = ["Lun","Mar","Mie","Joi","Vin","Sâm","Dum"];
-    document.getElementById("days-row").innerHTML = countPerDay.map((c,i) => `
+    const maxDay=Math.max(...countPerDay,1);
+    const todayIdx=dow===0?6:dow-1;
+    const dayLabels=["Lun","Mar","Mie","Joi","Vin","Sâm","Dum"];
+    document.getElementById("days-row").innerHTML=countPerDay.map((c,i)=>`
       <div class="day-col">
         <div class="day-label">${dayLabels[i]}</div>
-        <div class="day-bar-wrap">
-          <div class="day-bar ${i===todayIdx?'today':''}" style="height:${Math.round((c/maxDay)*56)+4}px"></div>
-        </div>
-        <div class="day-count">${c}</div>
+        <div class="day-bar-wrap"><div class="day-bar ${i===todayIdx?'today':''}" style="height:${Math.round((c/maxDay)*52)+4}px"></div></div>
+        <div class="day-count ${i===todayIdx?'today':''}">${c}</div>
       </div>
     `).join("");
 
-    // Nou vs Recurent
-    const total = nouiCount + recurentiCount;
-    const pctNou = total > 0 ? Math.round((nouiCount/total)*100) : 50;
-    const pctRec = 100 - pctNou;
-    document.getElementById("pie-bar").innerHTML = `
-      <div class="pie-new" style="width:${pctNou}%"></div>
-      <div class="pie-rec" style="width:${pctRec}%"></div>
-    `;
-    document.getElementById("pie-new-label").textContent = `Noi: ${nouiCount} (${pctNou}%)`;
-    document.getElementById("pie-rec-label").textContent = `Recurenți: ${recurentiCount} (${pctRec}%)`;
+    // Pie
+    const total=nouiCount+recurentiCount||1;
+    const pn=Math.round((nouiCount/total)*100);
+    document.getElementById("pie-bar").innerHTML=`<div class="pie-new" style="width:${pn}%"></div><div class="pie-rec" style="width:${100-pn}%"></div>`;
+    document.getElementById("pie-new-label").textContent=`Noi: ${nouiCount} (${pn}%)`;
+    document.getElementById("pie-rec-label").textContent=`Recurenți: ${recurentiCount} (${100-pn}%)`;
 
-    // Pacientul următor
-    const nowTime = now.getTime();
-    const urmator = programariAzi.find(p => new Date(p.appointment_datetime||0).getTime() > nowTime);
-    if(urmator) {
-      const ora = (urmator.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1] || "—";
-      const minuteRamase = Math.round((new Date(urmator.appointment_datetime).getTime() - nowTime) / 60000);
-      document.getElementById("next-patient-wrap").innerHTML = `
-        <div style="padding:16px 20px 0">
-          <div class="next-patient">
+    // Pacient următor
+    const nowMs=now.getTime();
+    const urmator=progAzi.find(p=>new Date(p.appointment_datetime||0).getTime()>nowMs);
+    if(urmator){
+      const ora=(urmator.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1]||"—";
+      const min=Math.round((new Date(urmator.appointment_datetime).getTime()-nowMs)/60000);
+      document.getElementById("next-wrap").innerHTML=`
+        <div class="next-wrap">
+          <div class="next-card">
+            <div class="next-avatar">${initiale(urmator.nume)}</div>
             <div>
               <div class="next-label">Urmează</div>
               <div class="next-name">${urmator.nume}</div>
-              <div class="next-detail">${urmator.diagnostic||'—'} · ${(urmator.tip_serviciu||'fizioterapie')}</div>
+              <div class="next-detail">${urmator.diagnostic||'—'} · ${urmator.tip_serviciu||'fizioterapie'}</div>
             </div>
-            <div class="next-time">
-              ${ora}
-              <div class="next-time-label">în ${minuteRamase} min</div>
+            <div class="next-time-wrap">
+              <div class="next-time">${ora}</div>
+              <div class="next-min">în ${min} min</div>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     } else {
-      document.getElementById("next-patient-wrap").innerHTML = "";
+      document.getElementById("next-wrap").innerHTML="";
     }
 
-    // Lista programări azi
-    if(programariAzi.length === 0) {
-      document.getElementById("prog-list").innerHTML = `<div class="empty-state">Nicio programare pentru azi</div>`;
+    // Lista azi
+    if(progAzi.length===0){
+      document.getElementById("prog-list").innerHTML=`<div class="empty">Nicio programare pentru azi</div>`;
     } else {
-      const nowHHMM = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
-      document.getElementById("prog-list").innerHTML = programariAzi.map(p => {
-        const ora = (p.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1] || "—";
-        const trecut = ora < nowHHMM;
-        const acum = !trecut && ora <= String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()+30).padStart(2,"00");
-        const tip = p.tip_serviciu || "fizioterapie";
-        return `<div class="prog-item ${acum&&!trecut?'acum':''}">
+      const nowHHMM=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+      document.getElementById("prog-list").innerHTML=progAzi.map(p=>{
+        const ora=(p.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1]||"—";
+        const trecut=ora<nowHHMM;
+        const acum=!trecut;
+        const tip=p.tip_serviciu||"fizioterapie";
+        return`<div class="prog-item ${acum&&ora===nowHHMM?'acum':''}">
           <div class="prog-time ${trecut?'past':''}">${ora}</div>
-          <div class="prog-avatar" style="${avatarColors(tip)}">${initiale(p.nume)}</div>
+          <div class="prog-avatar" style="${avatarStyle(tip)}">${initiale(p.nume)}</div>
           <div class="prog-info">
             <div class="prog-name">${p.nume}</div>
             <div class="prog-diag">${p.diagnostic||'—'}</div>
           </div>
           ${tipBadge(tip)}
-          ${acum&&!trecut?'<span class="prog-badge badge-acum">Acum</span>':''}
         </div>`;
       }).join("");
     }
 
-  } catch(e) {
-    console.error(e);
-    document.getElementById("prog-list").innerHTML = `<div class="empty-state" style="color:#c8502a">Eroare la încărcare: ${e.message}</div>`;
+  }catch(e){
+    document.getElementById("prog-list").innerHTML=`<div class="empty" style="color:#ef4444">Eroare: ${e.message}</div>`;
   }
-  document.getElementById("refresh-icon").style.animation="";
+  icon.style.animation="";
 }
 
-// Auto-refresh la fiecare 60 secunde
 loadData();
-setInterval(loadData, 60000);
+setInterval(loadData,60000);
 </script>
-<style>
-@keyframes spin{to{transform:rotate(360deg);}}
-#refresh-icon{display:inline-block;}
-</style>
 </body>
 </html>
