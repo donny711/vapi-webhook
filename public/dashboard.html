@@ -2,113 +2,164 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>KINETICS — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:#020817;color:#e2e8f0;font-family:'DM Sans',sans-serif;min-height:100vh;}
-  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#1e293b;border-radius:4px;}
-  input,button{font-family:'DM Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f0f0ef;color:#1a1a1a;font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#d0d0ce;border-radius:4px;}
 
-  #topbar{height:56px;border-bottom:1px solid #0f172a;display:flex;align-items:center;padding:0 24px;gap:16px;background:#020817;position:sticky;top:0;z-index:10;}
-  .logo{display:flex;align-items:center;gap:10px;}
-  .logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;}
-  .logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#f1f5f9;font-weight:700;}
-  .logo-tag{font-size:11px;color:#334155;margin-left:4px;letter-spacing:1px;text-transform:uppercase;}
-  #clock-wrap{margin-left:auto;text-align:right;}
-  #clock{font-family:'DM Mono',monospace;font-size:15px;color:#e2e8f0;}
-  #date-str{font-size:11px;color:#475569;margin-top:2px;}
-  #refresh-btn{padding:7px 14px;border-radius:8px;border:1px solid #1e293b;background:transparent;font-size:12px;cursor:pointer;color:#64748b;display:flex;align-items:center;gap:6px;margin-left:16px;}
-  #refresh-btn:hover{background:#0f172a;color:#e2e8f0;}
+/* ── TOPBAR ── */
+#topbar{height:56px;background:#fafaf9;border-bottom:1px solid #e4e4e2;display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#1a1a1a;font-weight:700;}
+.logo-sep{width:1px;height:18px;background:#e4e4e2;margin:0 2px;flex-shrink:0;}
+.logo-tag{font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+#clock{font-family:'DM Mono',monospace;font-size:15px;color:#1a1a1a;font-weight:500;letter-spacing:0.5px;}
+.live-pill{display:flex;align-items:center;gap:5px;background:#f0faf4;border:1px solid #b6dfc8;border-radius:20px;padding:4px 10px;font-size:11px;color:#2d8a55;white-space:nowrap;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#2d8a55;animation:pulse 2s infinite;flex-shrink:0;}
+#refresh-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e4e4e2;background:#fafaf9;cursor:pointer;color:#888;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;}
+#refresh-btn:hover{background:#f0f0ef;color:#1a1a1a;}
 
-  .page{padding:24px;}
+/* ── PAGE ── */
+.page{padding:16px;max-width:1400px;margin:0 auto;}
 
-  /* Stats */
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-  .stat-card{background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;}
-  .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac);}
-  .stat-label{font-size:11px;color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:'DM Mono',monospace;}
-  .stat-value{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;line-height:1;color:#f1f5f9;}
-  .stat-sub{font-size:12px;color:#475569;margin-top:8px;}
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.stat-card{background:#fafaf9;border:1px solid #e4e4e2;border-radius:14px;padding:16px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.stat-card:active{transform:scale(0.98);}
+.stat-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.stat-icon{font-size:18px;margin-bottom:8px;display:block;}
+.stat-label{font-size:9px;color:#999;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px;}
+.stat-value{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1;color:#1a1a1a;}
+.stat-sub{font-size:11px;color:#aaa;margin-top:6px;line-height:1.4;}
+.stat-bar{height:2px;background:#ebebea;border-radius:99px;margin-top:12px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:99px;transition:width 0.6s ease;}
 
-  /* Grid principal */
-  .main-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
+/* ── TABS ── */
+.tab-bar{display:flex;gap:0;background:#fafaf9;border:1px solid #e4e4e2;border-radius:12px;padding:3px;margin-bottom:16px;}
+.tab-btn{flex:1;padding:8px 6px;border-radius:10px;border:none;background:transparent;font-size:12px;cursor:pointer;color:#888;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;text-align:center;}
+.tab-btn.active{background:#1a1a1a;color:#fff;}
 
-  /* Card generic */
-  .card{background:#0f172a;border:1px solid #1e293b;border-radius:14px;overflow:hidden;margin-bottom:16px;}
-  .card:last-child{margin-bottom:0;}
-  .card-header{padding:14px 20px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;}
-  .card-title{font-size:13px;font-weight:600;color:#94a3b8;letter-spacing:0.5px;font-family:'DM Mono',monospace;text-transform:uppercase;}
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
 
-  /* Pacient următor */
-  .next-wrap{padding:16px 20px 0;}
-  .next-card{
-    background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);
-    border:1px solid #334155;border-radius:12px;padding:16px 20px;
-    display:flex;align-items:center;gap:16px;
-  }
-  .next-avatar{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1e3a5f,#2d5986);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#93c5fd;font-family:'DM Mono',monospace;flex-shrink:0;}
-  .next-label{font-size:10px;color:#475569;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-  .next-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#f1f5f9;}
-  .next-detail{font-size:12px;color:#64748b;margin-top:2px;}
-  .next-time-wrap{margin-left:auto;text-align:right;flex-shrink:0;}
-  .next-time{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:#3b82f6;}
-  .next-min{font-size:11px;color:#475569;margin-top:2px;}
+/* ── CARD ── */
+.card{background:#fafaf9;border:1px solid #e4e4e2;border-radius:14px;overflow:hidden;margin-bottom:12px;}
+.card:last-child{margin-bottom:0;}
+.card-header{padding:14px 16px;border-bottom:1px solid #ebebea;display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:10px;font-weight:600;color:#999;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+.card-badge{font-size:11px;color:#555;background:#f0f0ef;border:1px solid #e4e4e2;padding:3px 8px;border-radius:20px;}
 
-  /* Lista programări */
-  .prog-item{padding:13px 20px;border-bottom:1px solid #0f172a;display:flex;align-items:center;gap:12px;transition:background 0.15s;}
-  .prog-item:last-child{border-bottom:none;}
-  .prog-item:hover{background:#0f172a60;}
-  .prog-item.acum{background:#0c1a2e;border-left:2px solid #3b82f6;}
-  .prog-time{font-family:'DM Mono',monospace;font-size:14px;color:#e2e8f0;min-width:46px;flex-shrink:0;}
-  .prog-time.past{color:#334155;}
-  .prog-avatar{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
-  .prog-info{flex:1;min-width:0;}
-  .prog-name{font-size:13px;font-weight:500;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .prog-diag{font-size:11px;color:#475569;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .prog-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;}
-  .badge-fizio{background:#0c1a3a;color:#93c5fd;border:1px solid #1e3a5f;}
-  .badge-kineto{background:#1a0c3a;color:#c4b5fd;border:1px solid #2e1065;}
-  .badge-evaluare{background:#0c2a1e;color:#6ee7b7;border:1px solid #064e3b;}
-  .badge-acum{background:#1e3a5f;color:#3b82f6;border:1px solid #2563eb40;}
+/* ── NEXT PATIENT ── */
+.next-wrap{padding:14px 16px;}
+.next-card{background:#1a1a1a;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;}
+.next-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);}
+.next-avatar{width:46px;height:46px;border-radius:12px;flex-shrink:0;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;font-family:'DM Mono',monospace;border:1px solid rgba(255,255,255,0.12);}
+.next-meta{flex:1;min-width:0;}
+.next-eyebrow{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:3px;}
+.next-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.next-detail{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.next-time-block{text-align:right;flex-shrink:0;}
+.next-time{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:#fff;line-height:1;}
+.next-min{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;}
 
-  /* Săptămână */
-  .week-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px;}
-  .week-stat{background:#020817;border:1px solid #1e293b;border-radius:10px;padding:14px 16px;}
-  .week-label{font-size:10px;color:#475569;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px;}
-  .week-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#f1f5f9;}
+/* ── PROG LIST ── */
+.prog-item{padding:12px 16px;border-bottom:1px solid #ebebea;display:flex;align-items:center;gap:10px;}
+.prog-item:last-child{border-bottom:none;}
+.prog-item.trecut{opacity:0.35;}
+.prog-item.acum{background:#f7f7f6;border-left:2px solid #1a1a1a;}
+.prog-time{font-family:'DM Mono',monospace;font-size:13px;color:#888;min-width:40px;flex-shrink:0;}
+.prog-time.now{color:#1a1a1a;font-weight:600;}
+.prog-avatar{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;}
+.prog-info{flex:1;min-width:0;}
+.prog-name{font-size:13px;font-weight:500;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog-diag{font-size:11px;color:#bbb;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+.chip-fizio{background:#eef2ff;color:#4f63d2;border:1px solid #d4dafa;}
+.chip-kineto{background:#f5f0ff;color:#7c55c8;border:1px solid #ddd0f5;}
+.chip-eval{background:#effaf4;color:#2d8a55;border:1px solid #b6dfc8;}
+.chip-now{background:#1a1a1a;color:#fff;}
 
-  /* Grafic zile */
-  .days-section{padding:0 20px 16px;}
-  .days-row{display:flex;gap:6px;}
-  .day-col{flex:1;text-align:center;}
-  .day-label{font-size:10px;color:#334155;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;font-family:'DM Mono',monospace;}
-  .day-bar-wrap{height:56px;display:flex;align-items:flex-end;justify-content:center;}
-  .day-bar{width:100%;border-radius:4px 4px 0 0;background:#1e293b;min-height:4px;transition:height 0.4s;}
-  .day-bar.today{background:#3b82f6;}
-  .day-count{font-size:11px;font-family:'DM Mono',monospace;margin-top:4px;color:#475569;}
-  .day-count.today{color:#3b82f6;}
+/* ── WEEK STATS ── */
+.week-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px;}
+.week-stat{background:#f5f5f4;border:1px solid #ebebea;border-radius:10px;padding:12px 14px;}
+.week-icon{font-size:14px;margin-bottom:4px;display:block;}
+.week-label{font-size:9px;color:#aaa;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:3px;}
+.week-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#1a1a1a;}
 
-  /* Pie */
-  .pie-section{padding:16px 20px;}
-  .pie-bar{height:6px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:12px;background:#1e293b;}
-  .pie-new{background:#3b82f6;height:100%;}
-  .pie-rec{background:#8b5cf6;height:100%;}
-  .pie-legend{display:flex;gap:16px;}
-  .pie-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;}
-  .pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* ── BAR CHART ── */
+.chart-section{padding:0 16px 14px;}
+.chart-title{font-size:9px;color:#bbb;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:10px;}
+.days-row{display:flex;gap:6px;align-items:flex-end;height:70px;}
+.day-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;}
+.day-bar-wrap{flex:1;display:flex;align-items:flex-end;width:100%;}
+.day-bar{width:100%;border-radius:5px 5px 0 0;background:#e8e8e6;min-height:4px;transition:height 0.5s cubic-bezier(0.16,1,0.3,1);}
+.day-bar.has{background:#c8c8c6;}
+.day-bar.today{background:#1a1a1a;}
+.day-label{font-size:8px;color:#bbb;font-family:'DM Mono',monospace;margin-top:5px;letter-spacing:0.5px;}
+.day-label.today{color:#1a1a1a;font-weight:600;}
+.day-count{font-size:9px;font-family:'DM Mono',monospace;color:#bbb;margin-top:1px;}
+.day-count.today{color:#1a1a1a;font-weight:600;}
 
-  .live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  @keyframes spin{to{transform:rotate(360deg);}}
+/* ── PIE ── */
+.pie-section{padding:0 16px 16px;}
+.pie-bar{height:8px;border-radius:99px;overflow:hidden;display:flex;background:#ebebea;}
+.pie-new{background:#1a1a1a;height:100%;transition:width 0.5s ease;}
+.pie-rec{background:#ccc;height:100%;transition:width 0.5s ease;}
+.pie-legend{display:flex;gap:14px;margin-top:10px;}
+.pie-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;}
+.pie-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-  .empty{padding:24px;text-align:center;color:#334155;font-size:13px;}
+.divider{height:1px;background:#ebebea;}
+.empty{padding:28px;text-align:center;color:#ccc;font-size:13px;}
 
-  @media(max-width:900px){
-    .stats-grid{grid-template-columns:repeat(2,1fr);}
-    .main-grid{grid-template-columns:1fr;}
-  }
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.stat-card{animation:fadeUp 0.35s ease both;}
+.stat-card:nth-child(1){animation-delay:0.04s;}
+.stat-card:nth-child(2){animation-delay:0.08s;}
+.stat-card:nth-child(3){animation-delay:0.12s;}
+.stat-card:nth-child(4){animation-delay:0.16s;}
+
+/* ── DESKTOP ── */
+@media(min-width:768px){
+  #topbar{height:64px;padding:0 28px;gap:20px;}
+  .logo-icon{width:36px;height:36px;font-size:16px;}
+  .logo-name{font-size:18px;}
+  .logo-tag{font-size:11px;}
+  #clock{font-size:17px;}
+  .live-pill{font-size:12px;padding:5px 12px;}
+  #refresh-btn{width:auto;padding:8px 16px;font-size:12px;border-radius:10px;}
+  #refresh-btn::after{content:' Refresh';}
+
+  .page{padding:28px;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .stat-card{padding:22px 24px;border-radius:18px;}
+  .stat-value{font-size:44px;}
+  .tab-bar{display:none;}
+  .panel{display:block!important;}
+  .desktop-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;}
+  .card{border-radius:18px;margin-bottom:20px;}
+  .card-header{padding:16px 22px;}
+  .next-wrap{padding:18px 22px;}
+  .next-card{padding:18px 20px;}
+  .next-avatar{width:52px;height:52px;font-size:16px;}
+  .next-name{font-size:20px;}
+  .next-time{font-size:32px;}
+  .prog-item{padding:13px 22px;gap:12px;}
+  .prog-avatar{width:36px;height:36px;border-radius:10px;font-size:11px;}
+  .prog-name{font-size:13px;}
+  .week-grid{padding:18px 22px;gap:10px;}
+  .week-val{font-size:30px;}
+  .chart-section{padding:0 22px 18px;}
+  .pie-section{padding:0 22px 20px;}
+}
 </style>
 </head>
 <body>
@@ -116,96 +167,110 @@
 <div id="topbar">
   <div class="logo">
     <div class="logo-icon">🏥</div>
-    <span class="logo-name">Kinetics</span>
-    <span class="logo-tag">Dashboard Live</span>
+    <div class="logo-name">Kinetics</div>
+    <div class="logo-sep"></div>
+    <div class="logo-tag">Dashboard</div>
   </div>
-  <div id="clock-wrap">
-    <div id="clock">00:00:00</div>
-    <div id="date-str"></div>
+  <div class="topbar-right">
+    <div class="live-pill"><div class="live-dot"></div>Live</div>
+    <div id="clock">00:00</div>
+    <button id="refresh-btn" onclick="loadData()">
+      <span id="ref-icon" style="display:inline-block">↻</span>
+    </button>
   </div>
-  <button id="refresh-btn" onclick="loadData()">
-    <span id="ref-icon" style="display:inline-block">↻</span> Actualizează
-  </button>
 </div>
 
 <div class="page">
 
+  <!-- Stats -->
   <div class="stats-grid">
-    <div class="stat-card" style="--ac:#3b82f6">
-      <div class="stat-label">Programări azi</div>
+    <div class="stat-card">
+      <div class="stat-accent" style="background:#4f63d2"></div>
+      <span class="stat-icon">📅</span>
+      <div class="stat-label">Azi</div>
       <div class="stat-value" id="s-azi">—</div>
-      <div class="stat-sub" id="s-azi-sub">se încarcă...</div>
+      <div class="stat-sub" id="s-azi-sub">programări</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="s-azi-bar" style="width:0%;background:#4f63d2"></div></div>
     </div>
-    <div class="stat-card" style="--ac:#22c55e">
-      <div class="stat-label">Pacienți noi săpt.</div>
+    <div class="stat-card">
+      <div class="stat-accent" style="background:#2d8a55"></div>
+      <span class="stat-icon">✨</span>
+      <div class="stat-label">Noi</div>
       <div class="stat-value" id="s-noi">—</div>
-      <div class="stat-sub" id="s-noi-sub">această săptămână</div>
+      <div class="stat-sub">această săpt.</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="s-noi-bar" style="width:0%;background:#2d8a55"></div></div>
     </div>
-    <div class="stat-card" style="--ac:#8b5cf6">
-      <div class="stat-label">Pacienți recurenți</div>
+    <div class="stat-card">
+      <div class="stat-accent" style="background:#7c55c8"></div>
+      <span class="stat-icon">🔄</span>
+      <div class="stat-label">Recurenți</div>
       <div class="stat-value" id="s-rec">—</div>
       <div class="stat-sub" id="s-rec-sub">din total</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="s-rec-bar" style="width:0%;background:#7c55c8"></div></div>
     </div>
-    <div class="stat-card" style="--ac:#f59e0b">
-      <div class="stat-label">Urgențe active</div>
+    <div class="stat-card">
+      <div class="stat-accent" style="background:#c8852d"></div>
+      <span class="stat-icon">⚠️</span>
+      <div class="stat-label">Urgențe</div>
       <div class="stat-value" id="s-urg">—</div>
-      <div class="stat-sub">marcate în CRM</div>
+      <div class="stat-sub">în CRM</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="s-urg-bar" style="width:4%;background:#c8852d"></div></div>
     </div>
   </div>
 
-  <div class="main-grid">
+  <!-- Mobile tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="setTab('azi')">📅 Azi</button>
+    <button class="tab-btn" onclick="setTab('sapt')">📊 Săptămână</button>
+    <button class="tab-btn" onclick="setTab('pacienti')">👥 Pacienți</button>
+  </div>
 
-    <div>
+  <!-- Desktop grid / Mobile panels -->
+  <div class="desktop-grid">
+
+    <!-- Panel AZI -->
+    <div class="panel active" id="panel-azi">
       <div class="card">
         <div class="card-header">
           <span class="card-title">Programări de azi</span>
-          <span style="font-size:12px;color:#475569"><span class="live-dot"></span>Live</span>
+          <span class="card-badge" id="prog-count">0</span>
         </div>
         <div id="next-wrap"></div>
+        <div class="divider"></div>
         <div id="prog-list"><div class="empty">Se încarcă...</div></div>
       </div>
     </div>
 
+    <!-- Panel SĂPTĂMÂNĂ + PACIENȚI -->
     <div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Săptămâna aceasta</span>
-        </div>
-        <div class="week-grid">
-          <div class="week-stat">
-            <div class="week-label">Total</div>
-            <div class="week-val" id="w-total">—</div>
+      <div class="panel active" id="panel-sapt">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Săptămâna aceasta</span></div>
+          <div class="week-grid">
+            <div class="week-stat"><span class="week-icon">📊</span><div class="week-label">Total</div><div class="week-val" id="w-total">—</div></div>
+            <div class="week-stat"><span class="week-icon">📋</span><div class="week-label">Evaluări</div><div class="week-val" id="w-eval">—</div></div>
+            <div class="week-stat"><span class="week-icon">💆</span><div class="week-label">Fizioterapie</div><div class="week-val" id="w-fizio">—</div></div>
+            <div class="week-stat"><span class="week-icon">🏃</span><div class="week-label">Kinetoterapie</div><div class="week-val" id="w-kineto">—</div></div>
           </div>
-          <div class="week-stat">
-            <div class="week-label">Evaluări</div>
-            <div class="week-val" id="w-eval">—</div>
+          <div class="chart-section">
+            <div class="chart-title">Distribuție pe zile</div>
+            <div class="days-row" id="days-row"></div>
           </div>
-          <div class="week-stat">
-            <div class="week-label">Fizioterapie</div>
-            <div class="week-val" id="w-fizio">—</div>
-          </div>
-          <div class="week-stat">
-            <div class="week-label">Kinetoterapie</div>
-            <div class="week-val" id="w-kineto">—</div>
-          </div>
-        </div>
-        <div class="days-section">
-          <div class="days-row" id="days-row"></div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Noi vs Recurenți</span>
-        </div>
-        <div class="pie-section">
-          <div class="pie-bar" id="pie-bar">
-            <div class="pie-new" style="width:50%"></div>
-            <div class="pie-rec" style="width:50%"></div>
-          </div>
-          <div class="pie-legend">
-            <div class="pie-item"><div class="pie-dot" style="background:#3b82f6"></div><span id="pie-new-label">Noi: —</span></div>
-            <div class="pie-item"><div class="pie-dot" style="background:#8b5cf6"></div><span id="pie-rec-label">Recurenți: —</span></div>
+      <div class="panel active" id="panel-pacienti">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Noi vs Recurenți</span></div>
+          <div class="pie-section" style="padding-top:16px;">
+            <div class="pie-bar" id="pie-bar">
+              <div class="pie-new" style="width:50%"></div>
+              <div class="pie-rec" style="width:50%"></div>
+            </div>
+            <div class="pie-legend">
+              <div class="pie-item"><div class="pie-dot" style="background:#1a1a1a"></div><span id="pie-new-label">Noi: —</span></div>
+              <div class="pie-item"><div class="pie-dot" style="background:#ccc"></div><span id="pie-rec-label">Recurenți: —</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -216,154 +281,136 @@
 
 <script>
 const API=window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"?"https://vapi-webhook-pcnp.onrender.com":"";
+const isMobile=()=>window.innerWidth<768;
 
-function initiale(n){return(n||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();}
-
-function avatarStyle(tip){
-  if(tip==="kinetoterapie")return"background:linear-gradient(135deg,#1a0c3a,#2e1065);color:#c4b5fd";
-  if(tip==="evaluare")return"background:linear-gradient(135deg,#0c2a1e,#064e3b);color:#6ee7b7";
-  return"background:linear-gradient(135deg,#1e3a5f,#2d5986);color:#93c5fd";
+function setTab(tab){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>{
+    const tabs=["azi","sapt","pacienti"];
+    b.classList.toggle("active",tabs[i]===tab);
+  });
+  ["azi","sapt","pacienti"].forEach(t=>{
+    const el=document.getElementById(`panel-${t}`);
+    if(el)el.classList.toggle("active",t===tab);
+  });
 }
 
-function tipBadge(tip){
-  if(tip==="kinetoterapie")return`<span class="prog-badge badge-kineto">Kineto</span>`;
-  if(tip==="evaluare")return`<span class="prog-badge badge-evaluare">Evaluare</span>`;
-  return`<span class="prog-badge badge-fizio">Fizio</span>`;
+function initiale(n){return(n||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();}
+function avatarStyle(tip){
+  if(tip==="kinetoterapie")return"background:#f0eaff;color:#7c55c8";
+  if(tip==="evaluare")return"background:#e8f7ef;color:#2d8a55";
+  return"background:#eef2ff;color:#4f63d2";
+}
+function chipFor(tip){
+  if(tip==="kinetoterapie")return`<span class="chip chip-kineto">Kineto</span>`;
+  if(tip==="evaluare")return`<span class="chip chip-eval">Evaluare</span>`;
+  return`<span class="chip chip-fizio">Fizio</span>`;
 }
 
 function updateClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,"0");
-  const m=String(now.getMinutes()).padStart(2,"0");
-  const s=String(now.getSeconds()).padStart(2,"0");
-  document.getElementById("clock").textContent=`${h}:${m}:${s}`;
-  const zile=["Duminică","Luni","Marți","Miercuri","Joi","Vineri","Sâmbătă"];
-  document.getElementById("date-str").textContent=`${zile[now.getDay()]}, ${now.toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"})}`;
+  const now=new Date();const pad=n=>String(n).padStart(2,"0");
+  document.getElementById("clock").textContent=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 setInterval(updateClock,1000);updateClock();
 
 async function loadData(){
   const icon=document.getElementById("ref-icon");
-  icon.style.animation="spin 0.6s linear infinite";
+  icon.style.animation="spin 0.8s linear infinite";
   try{
     const res=await fetch(`${API}/pacienti`);
     const pacienti=await res.json();
     const now=new Date();
     const azi=now.toISOString().split("T")[0];
-
-    // Săptămâna curentă
+    const pad=n=>String(n).padStart(2,"0");
+    const nowHHMM=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
     const dow=now.getDay();
-    const monday=new Date(now);
-    monday.setDate(now.getDate()-(dow===0?6:dow-1));monday.setHours(0,0,0,0);
+    const monday=new Date(now);monday.setDate(now.getDate()-(dow===0?6:dow-1));monday.setHours(0,0,0,0);
     const sunday=new Date(monday);sunday.setDate(monday.getDate()+6);sunday.setHours(23,59,59,999);
 
-    // Programări azi
-    const progAzi=pacienti
-      .filter(p=>(p.appointment_datetime||"").split("T")[0]===azi)
-      .sort((a,b)=>(a.appointment_datetime||"").localeCompare(b.appointment_datetime||""));
-
-    // Programări săptămâna
-    const progSapt=pacienti.filter(p=>{
-      const d=new Date(p.appointment_datetime||0);
-      return d>=monday&&d<=sunday;
-    });
-
-    // Noi vs recurenți (simplu: unici în această săptămână)
+    const progAzi=pacienti.filter(p=>(p.appointment_datetime||"").split("T")[0]===azi).sort((a,b)=>(a.appointment_datetime||"").localeCompare(b.appointment_datetime||""));
+    const progSapt=pacienti.filter(p=>{const d=new Date(p.appointment_datetime||0);return d>=monday&&d<=sunday;});
     const telefoneSapt=new Set(progSapt.map(p=>p.telefon));
-    const nouiCount=[...telefoneSapt].filter(t=>
-      pacienti.filter(p=>p.telefon===t).length===1
-    ).length;
+    const nouiCount=[...telefoneSapt].filter(t=>pacienti.filter(p=>p.telefon===t).length===1).length;
     const recurentiCount=pacienti.length-nouiCount;
     const urgente=pacienti.filter(p=>p.urgent).length;
+    const maxStat=Math.max(progAzi.length,nouiCount,recurentiCount,urgente,1);
 
-    // Stats
     document.getElementById("s-azi").textContent=progAzi.length;
-    document.getElementById("s-azi-sub").textContent=`din care ${progAzi.filter(p=>(p.tip_serviciu||"")==="evaluare").length} evaluări`;
+    document.getElementById("s-azi-sub").textContent=`${progAzi.filter(p=>(p.tip_serviciu||"")==="evaluare").length} evaluări`;
+    document.getElementById("s-azi-bar").style.width=`${Math.round((progAzi.length/maxStat)*100)}%`;
     document.getElementById("s-noi").textContent=nouiCount;
+    document.getElementById("s-noi-bar").style.width=`${Math.round((nouiCount/maxStat)*100)}%`;
     document.getElementById("s-rec").textContent=recurentiCount;
-    document.getElementById("s-rec-sub").textContent=`din ${pacienti.length} total`;
+    document.getElementById("s-rec-sub").textContent=`din ${pacienti.length}`;
+    document.getElementById("s-rec-bar").style.width=`${Math.round((recurentiCount/maxStat)*100)}%`;
     document.getElementById("s-urg").textContent=urgente;
+    document.getElementById("s-urg-bar").style.width=urgente>0?`${Math.round((urgente/maxStat)*100)}%`:"4%";
 
-    // Săptămână
     document.getElementById("w-total").textContent=progSapt.length;
     document.getElementById("w-eval").textContent=progSapt.filter(p=>(p.tip_serviciu||"")==="evaluare").length;
     document.getElementById("w-fizio").textContent=progSapt.filter(p=>(p.tip_serviciu||"fizioterapie")==="fizioterapie").length;
     document.getElementById("w-kineto").textContent=progSapt.filter(p=>(p.tip_serviciu||"")==="kinetoterapie").length;
 
-    // Grafic zile
     const countPerDay=[0,0,0,0,0,0,0];
-    progSapt.forEach(p=>{
-      const d=new Date(p.appointment_datetime||0);
-      const idx=d.getDay()===0?6:d.getDay()-1;
-      countPerDay[idx]++;
-    });
+    progSapt.forEach(p=>{const d=new Date(p.appointment_datetime||0);const idx=d.getDay()===0?6:d.getDay()-1;countPerDay[idx]++;});
     const maxDay=Math.max(...countPerDay,1);
     const todayIdx=dow===0?6:dow-1;
-    const dayLabels=["Lun","Mar","Mie","Joi","Vin","Sâm","Dum"];
+    const dayLabels=["L","M","M","J","V","S","D"];
     document.getElementById("days-row").innerHTML=countPerDay.map((c,i)=>`
       <div class="day-col">
-        <div class="day-label">${dayLabels[i]}</div>
-        <div class="day-bar-wrap"><div class="day-bar ${i===todayIdx?'today':''}" style="height:${Math.round((c/maxDay)*52)+4}px"></div></div>
-        <div class="day-count ${i===todayIdx?'today':''}">${c}</div>
-      </div>
-    `).join("");
+        <div class="day-bar-wrap"><div class="day-bar ${i===todayIdx?'today':''} ${c>0?'has':''}" style="height:${Math.round((c/maxDay)*56)+4}px"></div></div>
+        <div class="day-label ${i===todayIdx?'today':''}">${dayLabels[i]}</div>
+        <div class="day-count ${i===todayIdx?'today':''}">${c||''}</div>
+      </div>`).join("");
 
-    // Pie
-    const total=nouiCount+recurentiCount||1;
+    const total=Math.max(nouiCount+recurentiCount,1);
     const pn=Math.round((nouiCount/total)*100);
     document.getElementById("pie-bar").innerHTML=`<div class="pie-new" style="width:${pn}%"></div><div class="pie-rec" style="width:${100-pn}%"></div>`;
     document.getElementById("pie-new-label").textContent=`Noi: ${nouiCount} (${pn}%)`;
     document.getElementById("pie-rec-label").textContent=`Recurenți: ${recurentiCount} (${100-pn}%)`;
 
-    // Pacient următor
-    const nowMs=now.getTime();
-    const urmator=progAzi.find(p=>new Date(p.appointment_datetime||0).getTime()>nowMs);
+    document.getElementById("prog-count").textContent=progAzi.length;
+    const urmator=progAzi.find(p=>new Date(p.appointment_datetime||0).getTime()>now.getTime());
     if(urmator){
       const ora=(urmator.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1]||"—";
-      const min=Math.round((new Date(urmator.appointment_datetime).getTime()-nowMs)/60000);
-      document.getElementById("next-wrap").innerHTML=`
-        <div class="next-wrap">
-          <div class="next-card">
-            <div class="next-avatar">${initiale(urmator.nume)}</div>
-            <div>
-              <div class="next-label">Urmează</div>
-              <div class="next-name">${urmator.nume}</div>
-              <div class="next-detail">${urmator.diagnostic||'—'} · ${urmator.tip_serviciu||'fizioterapie'}</div>
-            </div>
-            <div class="next-time-wrap">
-              <div class="next-time">${ora}</div>
-              <div class="next-min">în ${min} min</div>
-            </div>
-          </div>
-        </div>`;
+      const min=Math.round((new Date(urmator.appointment_datetime).getTime()-now.getTime())/60000);
+      document.getElementById("next-wrap").innerHTML=`<div class="next-wrap"><div class="next-card">
+        <div class="next-avatar">${initiale(urmator.nume)}</div>
+        <div class="next-meta">
+          <div class="next-eyebrow">Urmează</div>
+          <div class="next-name">${urmator.nume}</div>
+          <div class="next-detail">${urmator.diagnostic||'—'} · ${urmator.tip_serviciu||'fizioterapie'}</div>
+        </div>
+        <div class="next-time-block">
+          <div class="next-time">${ora}</div>
+          <div class="next-min">în ${min} min</div>
+        </div>
+      </div></div>`;
     } else {
       document.getElementById("next-wrap").innerHTML="";
     }
 
-    // Lista azi
     if(progAzi.length===0){
       document.getElementById("prog-list").innerHTML=`<div class="empty">Nicio programare pentru azi</div>`;
     } else {
-      const nowHHMM=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
       document.getElementById("prog-list").innerHTML=progAzi.map(p=>{
         const ora=(p.appointment_datetime||"").match(/T(\d{2}:\d{2})/)?.[1]||"—";
         const trecut=ora<nowHHMM;
-        const acum=!trecut;
+        const acum=!trecut&&ora<=nowHHMM;
         const tip=p.tip_serviciu||"fizioterapie";
-        return`<div class="prog-item ${acum&&ora===nowHHMM?'acum':''}">
-          <div class="prog-time ${trecut?'past':''}">${ora}</div>
+        return`<div class="prog-item ${trecut?'trecut':''} ${acum&&!trecut?'acum':''}">
+          <div class="prog-time ${acum&&!trecut?'now':''}">${ora}</div>
           <div class="prog-avatar" style="${avatarStyle(tip)}">${initiale(p.nume)}</div>
           <div class="prog-info">
             <div class="prog-name">${p.nume}</div>
             <div class="prog-diag">${p.diagnostic||'—'}</div>
           </div>
-          ${tipBadge(tip)}
+          ${chipFor(tip)}
+          ${acum&&!trecut?'<span class="chip chip-now">Acum</span>':''}
         </div>`;
       }).join("");
     }
-
   }catch(e){
-    document.getElementById("prog-list").innerHTML=`<div class="empty" style="color:#ef4444">Eroare: ${e.message}</div>`;
+    document.getElementById("prog-list").innerHTML=`<div class="empty" style="color:#c0392b">Eroare: ${e.message}</div>`;
   }
   icon.style.animation="";
 }
