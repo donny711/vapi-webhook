@@ -30,7 +30,7 @@ let sheetInitPromise = null;
 const HEADERS = [
   "full_name", "phone_number", "pain_complaint", "caller_id_number",
   "has_exact_datetime", "appointment_datetime", "reminder_sent",
-  "sedinte_ramase", "note_terapeut", "urgent",
+  "sedinte_ramase", "note_terapeut", "urgent", "tip_serviciu",
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -144,7 +144,6 @@ cron.schedule("0 10 * * *", async () => {
   } catch (err) { console.error("[CRON] Eroare:", err.message); }
 });
 
-// ─── CRM API ───────────────────────────────────────────────────────────────
 app.get("/pacienti", async (_req, res) => {
   try {
     const sheet = await getSheet();
@@ -161,6 +160,7 @@ app.get("/pacienti", async (_req, res) => {
           sedinte_ramase:       parseInt(row.get("sedinte_ramase") || "0"),
           note_terapeut:        row.get("note_terapeut") || "",
           urgent:               row.get("urgent") === "true",
+          tip_serviciu:         row.get("tip_serviciu") || "fizioterapie",
           appointment_datetime: row.get("appointment_datetime") || "",
           ultima_vizita:        row.get("appointment_datetime")?.split("T")[0] || "",
         });
@@ -191,12 +191,13 @@ app.put("/pacienti/:telefon", async (req, res) => {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
     const tel   = req.params.telefon;
-    const { sedinte_ramase, note_terapeut, urgent } = req.body;
+    const { sedinte_ramase, note_terapeut, urgent, tip_serviciu } = req.body;
     const row = rows.find(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel);
     if (!row) return res.status(404).json({ error: "Pacient negăsit" });
     if (sedinte_ramase !== undefined) row.set("sedinte_ramase", String(sedinte_ramase));
     if (note_terapeut  !== undefined) row.set("note_terapeut", note_terapeut);
     if (urgent         !== undefined) row.set("urgent", String(urgent));
+    if (tip_serviciu   !== undefined) row.set("tip_serviciu", tip_serviciu);
     await withRetry(() => row.save());
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -224,6 +225,7 @@ app.post("/vapi/webhook", (req, res) => {
     sedinte_ramase:       "",
     note_terapeut:        "",
     urgent:               "false",
+    tip_serviciu:         structuredData.tip_serviciu ?? "fizioterapie",
   };
   (async () => {
     try {
