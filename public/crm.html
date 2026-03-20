@@ -7,116 +7,113 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:#f0f0ef;color:#1a1a1a;font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-text-size-adjust:100%;}
-::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#d0d0ce;border-radius:4px;}
+body{background:#09090b;color:#fafafa;font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-text-size-adjust:100%;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#27272a;border-radius:4px;}
 input,textarea,button{font-family:'DM Sans',sans-serif;}input:focus,textarea:focus{outline:none;}
 
-/* ── TOPBAR ── */
-#topbar{height:56px;background:#fafaf9;border-bottom:1px solid #e4e4e2;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;z-index:10;}
+#topbar{height:56px;background:#09090b;border-bottom:1px solid #27272a;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;z-index:10;}
 .logo{display:flex;align-items:center;gap:10px;}
-.logo-icon{width:32px;height:32px;border-radius:8px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#1a1a1a;font-weight:700;}
-.logo-sep{width:1px;height:18px;background:#e4e4e2;margin:0 2px;flex-shrink:0;}
-.logo-tag{font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;}
-#stats{margin-left:auto;font-size:11px;color:#aaa;display:none;}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:#18181b;border:1px solid #3f3f46;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-name{font-family:'Playfair Display',serif;font-size:16px;color:#fafafa;font-weight:700;}
+.logo-sep{width:1px;height:18px;background:#27272a;margin:0 2px;flex-shrink:0;}
+.logo-tag{font-size:10px;color:#52525b;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;}
+#stats{margin-left:auto;font-size:11px;color:#3f3f46;display:none;}
 
-/* ── SERVICE TABS ── */
-#service-tabs{display:flex;gap:0;padding:10px 16px 0;background:#fafaf9;border-bottom:1px solid #e4e4e2;flex-shrink:0;}
-.stab{flex:1;padding:8px 4px;border:none;background:transparent;font-size:12px;cursor:pointer;color:#aaa;border-bottom:2px solid transparent;transition:all 0.2s;font-family:'DM Sans',sans-serif;font-weight:500;text-align:center;}
-.stab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;}
+#service-tabs{display:flex;gap:0;padding:10px 16px 0;background:#09090b;border-bottom:1px solid #27272a;flex-shrink:0;}
+.stab{flex:1;padding:8px 4px;border:none;background:transparent;font-size:12px;cursor:pointer;color:#52525b;border-bottom:2px solid transparent;transition:all 0.2s;font-family:'DM Sans',sans-serif;font-weight:500;text-align:center;}
+.stab:hover{color:#71717a;}
+.stab.active{color:#e4e4e7;border-bottom-color:#e4e4e7;}
 
-/* ── MAIN ── */
 #main{flex:1;display:flex;overflow:hidden;}
 
-/* ── SIDEBAR ── */
-#sidebar{width:100%;display:flex;flex-direction:column;background:#f0f0ef;flex-shrink:0;transition:transform 0.3s ease;}
+#sidebar{width:100%;display:flex;flex-direction:column;background:#09090b;flex-shrink:0;}
 #search-wrap{padding:12px 12px 8px;}
-#search{width:100%;padding:10px 14px;border-radius:10px;background:#fafaf9;border:1px solid #e4e4e2;color:#1a1a1a;font-size:14px;}
-#search::placeholder{color:#bbb;}
+#search{width:100%;padding:10px 14px;border-radius:10px;background:#18181b;border:1px solid #27272a;color:#e4e4e7;font-size:14px;}
+#search::placeholder{color:#3f3f46;}
+#search:focus{border-color:#52525b;}
 #filters{display:flex;gap:6px;padding:0 12px 10px;}
-.filter-btn{flex:1;padding:6px 0;border-radius:8px;font-size:11px;cursor:pointer;border:1px solid #e4e4e2;background:#fafaf9;color:#aaa;font-weight:500;transition:all 0.2s;}
-.filter-btn.active{border-color:#1a1a1a;background:#1a1a1a;color:#fff;}
+.filter-btn{flex:1;padding:6px 0;border-radius:8px;font-size:11px;cursor:pointer;border:1px solid #27272a;background:#18181b;color:#52525b;font-weight:500;transition:all 0.2s;}
+.filter-btn.active{border-color:#52525b;background:#27272a;color:#e4e4e7;}
 #list{flex:1;overflow-y:auto;padding:0 8px 80px;}
 
-.pac-card{padding:13px 14px;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;display:flex;align-items:center;gap:11px;margin-bottom:4px;background:#fafaf9;}
+.pac-card{padding:13px 14px;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;display:flex;align-items:center;gap:11px;margin-bottom:4px;}
+.pac-card:hover{background:#18181b;}
 .pac-card:active{transform:scale(0.98);}
-.pac-card.active{background:#fff;border-color:#e4e4e2;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-.avatar{width:40px;height:40px;border-radius:10px;flex-shrink:0;background:#ebebea;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#555;font-family:'DM Mono',monospace;letter-spacing:1px;}
+.pac-card.active{background:#18181b;border-color:#27272a;}
+.avatar{width:40px;height:40px;border-radius:10px;flex-shrink:0;background:#27272a;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#71717a;font-family:'DM Mono',monospace;letter-spacing:1px;}
 .pac-info{flex:1;min-width:0;}
-.pac-name{font-size:14px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pac-diag{font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pac-name{font-size:14px;font-weight:600;color:#e4e4e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pac-diag{font-size:11px;color:#3f3f46;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
-/* ── BACK BTN (mobile) ── */
-#back-btn{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;background:#1a1a1a;color:#fff;border:none;border-radius:20px;padding:10px 20px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+#back-btn{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;background:#27272a;color:#e4e4e7;border:1px solid #3f3f46;border-radius:20px;padding:10px 20px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;}
 
-/* ── CONTENT ── */
-#content{flex:1;overflow-y:auto;background:#f0f0ef;display:none;}
+#content{flex:1;overflow-y:auto;background:#09090b;display:none;}
 #profil{padding:16px 16px 100px;}
 
-.profil-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;background:#fafaf9;border:1px solid #e4e4e2;border-radius:14px;padding:16px;}
-.avatar-lg{width:56px;height:56px;border-radius:14px;flex-shrink:0;background:#ebebea;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#555;font-family:'DM Mono',monospace;letter-spacing:2px;}
-.profil-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1a1a1a;margin-bottom:4px;}
-.profil-sub{font-size:12px;color:#aaa;margin-bottom:8px;}
-.badge{font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-right:6px;margin-bottom:4px;}
+.profil-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;background:#18181b;border:1px solid #27272a;border-radius:14px;padding:16px;}
+.avatar-lg{width:52px;height:52px;border-radius:12px;flex-shrink:0;background:#27272a;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#71717a;font-family:'DM Mono',monospace;border:1px solid #3f3f46;}
+.profil-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fafafa;margin-bottom:4px;}
+.profil-sub{font-size:12px;color:#3f3f46;margin-bottom:8px;}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;display:inline-block;margin-right:6px;margin-bottom:4px;}
 
-.card{background:#fafaf9;border:1px solid #e4e4e2;border-radius:14px;padding:16px;margin-bottom:12px;}
-.card-label{font-size:10px;color:#aaa;margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.card{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:16px;margin-bottom:12px;}
+.card-label{font-size:10px;color:#52525b;margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
 .card-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 
 .sedinte-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .sedinte-num{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;}
-.progress-bar{height:4px;background:#ebebea;border-radius:99px;overflow:hidden;margin-bottom:14px;}
+.progress-bar{height:2px;background:#27272a;border-radius:99px;overflow:hidden;margin-bottom:14px;}
 .progress-fill{height:100%;border-radius:99px;}
 .btn-row{display:flex;gap:8px;}
-.btn-sm{flex:1;padding:10px 0;border-radius:10px;border:1px solid #e4e4e2;background:#fff;color:#1a1a1a;font-size:20px;cursor:pointer;transition:all 0.15s;}
-.btn-sm:active{background:#f0f0ef;}
+.btn-sm{flex:1;padding:10px 0;border-radius:10px;border:1px solid #27272a;background:#27272a;color:#e4e4e7;font-size:20px;cursor:pointer;transition:all 0.15s;}
+.btn-sm:hover{background:#3f3f46;}
+.btn-sm:active{transform:scale(0.97);}
 
 .prog-row{display:flex;justify-content:space-between;margin-bottom:8px;}
-.prog-data{font-size:13px;color:#1a1a1a;}
-.prog-ora{font-size:13px;color:#2d8a55;font-family:'DM Mono',monospace;}
+.prog-data{font-size:13px;color:#a1a1aa;}
+.prog-ora{font-size:13px;color:#71717a;font-family:'DM Mono',monospace;}
 
-.note-text{font-size:13px;color:#888;line-height:1.7;}
-.note-edit{width:100%;background:#fff;border:1px solid #e4e4e2;border-radius:10px;padding:12px;color:#1a1a1a;font-size:14px;line-height:1.7;resize:vertical;min-height:100px;}
-.btn-edit{font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #e4e4e2;background:#fff;color:#888;cursor:pointer;}
+.note-text{font-size:13px;color:#52525b;line-height:1.7;}
+.note-edit{width:100%;background:#27272a;border:1px solid #3f3f46;border-radius:10px;padding:12px;color:#e4e4e7;font-size:14px;line-height:1.7;resize:vertical;min-height:100px;}
+.note-edit:focus{border-color:#52525b;}
+.btn-edit{font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #27272a;background:#27272a;color:#71717a;cursor:pointer;}
+.btn-edit:hover{color:#a1a1aa;}
 
-.urgent-toggle{display:flex;align-items:center;gap:12px;background:#fafaf9;border:1px solid #e4e4e2;border-radius:14px;padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;}
-.urgent-toggle.on{border-color:#c8852d;background:#fff8f0;}
-.toggle-switch{width:44px;height:24px;border-radius:99px;background:#e4e4e2;position:relative;flex-shrink:0;transition:background 0.2s;}
-.toggle-switch.on{background:#c8852d;}
-.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
-.toggle-switch.on .toggle-knob{left:23px;}
-.urgent-label{font-size:13px;font-weight:600;color:#aaa;}
-.urgent-toggle.on .urgent-label{color:#c8852d;}
+.urgent-toggle{display:flex;align-items:center;gap:12px;background:#18181b;border:1px solid #27272a;border-radius:14px;padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;}
+.urgent-toggle.on{border-color:#71717a;background:#27272a;}
+.toggle-switch{width:44px;height:24px;border-radius:99px;background:#27272a;position:relative;flex-shrink:0;transition:background 0.2s;}
+.toggle-switch.on{background:#52525b;}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#71717a;position:absolute;top:3px;left:3px;transition:left 0.2s;}
+.toggle-switch.on .toggle-knob{left:23px;background:#e4e4e7;}
+.urgent-label{font-size:13px;font-weight:600;color:#3f3f46;}
+.urgent-toggle.on .urgent-label{color:#a1a1aa;}
 
 .tip-selector{display:flex;gap:6px;margin-bottom:12px;}
-.tip-btn{flex:1;padding:10px 4px;border-radius:10px;border:1px solid #e4e4e2;background:#fafaf9;color:#aaa;font-size:11px;cursor:pointer;font-weight:500;transition:all 0.2s;text-align:center;}
-.tip-btn.active-fizio{border-color:#4f63d2;background:#eef2ff;color:#4f63d2;}
-.tip-btn.active-kineto{border-color:#7c55c8;background:#f5f0ff;color:#7c55c8;}
-.tip-btn.active-evaluare{border-color:#2d8a55;background:#effaf4;color:#2d8a55;}
+.tip-btn{flex:1;padding:10px 4px;border-radius:10px;border:1px solid #27272a;background:#18181b;color:#3f3f46;font-size:11px;cursor:pointer;font-weight:500;transition:all 0.2s;text-align:center;}
+.tip-btn:hover{border-color:#3f3f46;color:#71717a;}
+.tip-btn.active-fizio{border-color:#312e81;background:#1e1b4b;color:#818cf8;}
+.tip-btn.active-kineto{border-color:#2e1065;background:#1a0c3a;color:#c4b5fd;}
+.tip-btn.active-evaluare{border-color:#064e3b;background:#0c2a1e;color:#6ee7b7;}
 
-#btn-save{width:100%;padding:14px 0;border-radius:12px;border:none;background:#1a1a1a;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;margin-top:4px;}
-#btn-save.saved{background:#2d8a55;}
+#btn-save{width:100%;padding:14px 0;border-radius:12px;border:none;background:#27272a;color:#e4e4e7;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;margin-top:4px;border:1px solid #3f3f46;}
+#btn-save:hover{background:#3f3f46;}
+#btn-save.saved{background:#052e16;color:#22c55e;border-color:#166534;}
 #btn-save:active{transform:scale(0.98);}
 
-#empty{display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:14px;}
+#empty{display:flex;align-items:center;justify-content:center;height:100%;color:#27272a;font-size:14px;}
 
-/* ── DESKTOP ── */
 @media(min-width:768px){
   body{overflow:hidden;}
   #topbar{height:56px;padding:0 24px;}
   #stats{display:block;}
   #service-tabs{padding:0 24px;}
   .stab{padding:14px 20px;font-size:13px;}
-  #main{overflow:hidden;}
-  #sidebar{width:300px;border-right:1px solid #e4e4e2;background:#fafaf9;}
+  #sidebar{width:300px;border-right:1px solid #27272a;}
   #search-wrap{padding:14px 14px 8px;}
-  #search{font-size:13px;}
-  #filters{padding:0 14px 10px;}
   #list{padding:0 8px 16px;}
   #back-btn{display:none!important;}
   #content{display:flex!important;flex-direction:column;}
-  #content > #profil{flex:1;}
   #empty{display:flex;}
 }
 </style>
@@ -125,7 +122,13 @@ input,textarea,button{font-family:'DM Sans',sans-serif;}input:focus,textarea:foc
 
 <div id="topbar">
   <div class="logo">
-    <div class="logo-icon">🏥</div>
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 26 26" fill="none">
+        <rect x="5" y="4" width="4" height="18" rx="1" fill="#e4e4e7"/>
+        <path d="M9 13 L20 4" stroke="#e4e4e7" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M9 13 L20 22" stroke="#e4e4e7" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+    </div>
     <div class="logo-name">Kinetics</div>
     <div class="logo-sep"></div>
     <div class="logo-tag">CRM</div>
@@ -147,7 +150,7 @@ input,textarea,button{font-family:'DM Sans',sans-serif;}input:focus,textarea:foc
       <button class="filter-btn" data-f="urgent" onclick="setFilter('urgent')">⚠ Urgent</button>
       <button class="filter-btn" data-f="finalizat" onclick="setFilter('finalizat')">✓ Finalizat</button>
     </div>
-    <div id="list"><div style="text-align:center;color:#bbb;padding:20px;font-size:13px">Se încarcă...</div></div>
+    <div id="list"><div style="text-align:center;color:#27272a;padding:20px;font-size:13px">Se încarcă...</div></div>
   </div>
 
   <div id="content">
@@ -155,7 +158,7 @@ input,textarea,button{font-family:'DM Sans',sans-serif;}input:focus,textarea:foc
   </div>
 </div>
 
-<button id="back-btn" onclick="goBack()">← Înapoi la listă</button>
+<button id="back-btn" onclick="goBack()">← Înapoi</button>
 
 <script>
 const API=window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"?"https://vapi-webhook-pcnp.onrender.com":"";
@@ -163,7 +166,7 @@ const isMobile=()=>window.innerWidth<768;
 let pacienti=[],programariCache={},selectedTelefon=null,filterVal="toti",tabVal="fizioterapie",editNote=false,localState={};
 
 function initiale(n){return(n||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();}
-function dotColor(sr){return sr===0?"#ef4444":sr<=3?"#c8852d":"#2d8a55";}
+function dotColor(sr){return sr===0?"#ef4444":sr<=3?"#f59e0b":"#22c55e";}
 
 async function loadPacienti(){
   try{
@@ -187,7 +190,7 @@ function setTab(t){
   const first=pacienti.find(p=>(getLocal(p,"tip_serviciu")||"fizioterapie")===t);
   selectedTelefon=first?first.telefon:null;
   editNote=false;
-  if(isMobile()){showSidebar();}
+  if(isMobile())showSidebar();
   render();
   if(selectedTelefon)loadProgramari(selectedTelefon);
 }
@@ -195,10 +198,7 @@ function setTab(t){
 function setFilter(f){filterVal=f;document.querySelectorAll(".filter-btn").forEach(b=>b.classList.toggle("active",b.dataset.f===f));render();}
 
 function selectPacient(telefon){
-  selectedTelefon=telefon;
-  editNote=false;
-  render();
-  loadProgramari(telefon);
+  selectedTelefon=telefon;editNote=false;render();loadProgramari(telefon);
   if(isMobile())showContent();
 }
 
@@ -240,12 +240,12 @@ function render(){
   const finalizati=totiTab.filter(p=>getLocal(p,"sedinte_ramase")===0).length;
 
   document.getElementById("stats").innerHTML=
-    `<span style="color:#c8852d;font-weight:600">${urgenti}</span> urgente &middot; `+
+    `<span style="color:#f59e0b;font-weight:600">${urgenti}</span> urgente &middot; `+
     `<span style="color:#ef4444;font-weight:600">${finalizati}</span> fin. &middot; `+
-    `<span style="color:#2d8a55;font-weight:600">${totiTab.length}</span> total`;
+    `<span style="color:#22c55e;font-weight:600">${totiTab.length}</span> total`;
 
   document.getElementById("list").innerHTML=filtrati.length===0
-    ?`<div style="text-align:center;color:#ccc;margin-top:40px;font-size:13px">Niciun pacient găsit</div>`
+    ?`<div style="text-align:center;color:#27272a;margin-top:40px;font-size:13px">Niciun pacient găsit</div>`
     :filtrati.map(p=>{
       const isUrgent=getLocal(p,"urgent");
       const sr=getLocal(p,"sedinte_ramase");
@@ -253,10 +253,10 @@ function render(){
       return`<div class="pac-card ${p.telefon===selectedTelefon?'active':''}" onclick="selectPacient('${p.telefon}')">
         <div class="avatar">${initiale(p.nume)}</div>
         <div class="pac-info">
-          <div class="pac-name">${p.nume}${isUrgent?' <span style="font-size:9px;color:#c8852d;background:#fff8f0;padding:1px 6px;border-radius:8px;border:1px solid #f5d0a0">URGENT</span>':''}</div>
+          <div class="pac-name">${p.nume}${isUrgent?' <span style="font-size:9px;color:#f59e0b;background:#27272a;padding:1px 6px;border-radius:8px;border:1px solid #3f3f46">URGENT</span>':''}</div>
           <div class="pac-diag">${p.diagnostic||'—'}</div>
         </div>
-        <div class="dot" style="background:${dotC};box-shadow:0 0 5px ${dotC}40"></div>
+        <div class="dot" style="background:${dotC}"></div>
       </div>`;
     }).join("");
 
@@ -282,8 +282,8 @@ function renderProfil(){
       <div style="flex:1;min-width:0;">
         <div class="profil-name">${pac.nume}</div>
         <div class="profil-sub">Ultima vizită: ${pac.ultima_vizita||'—'}</div>
-        <span class="badge" style="background:#f0f0ef;color:#555;border:1px solid #e4e4e2">📞 ${pac.telefon}</span>
-        <span class="badge" style="background:#f5f0ff;color:#7c55c8;border:1px solid #ddd0f5">🦴 ${pac.diagnostic||'—'}</span>
+        <span class="badge" style="background:#27272a;color:#71717a;border:1px solid #3f3f46">📞 ${pac.telefon}</span>
+        <span class="badge" style="background:#1a0c3a;color:#c4b5fd;border:1px solid #2e1065">🦴 ${pac.diagnostic||'—'}</span>
       </div>
     </div>
 
@@ -313,7 +313,7 @@ function renderProfil(){
       <div class="card" style="margin:0">
         <div class="card-label">Programări</div>
         ${programari.length===0
-          ?`<div style="font-size:12px;color:#bbb">Se încarcă...</div>`
+          ?`<div style="font-size:12px;color:#27272a">Se încarcă...</div>`
           :programari.slice(0,3).map(p=>`<div class="prog-row"><span class="prog-data">${p.data}</span><span class="prog-ora">${p.ora}</span></div>`).join("")}
       </div>
     </div>
@@ -325,7 +325,7 @@ function renderProfil(){
       </div>
       ${editNote
         ?`<textarea class="note-edit" id="note-input">${noteVal||''}</textarea>`
-        :`<p class="note-text">${noteVal||'<span style="color:#ccc">Nicio notă adăugată.</span>'}</p>`}
+        :`<p class="note-text">${noteVal||'<span style="color:#27272a">Nicio notă adăugată.</span>'}</p>`}
     </div>
 
     <button id="btn-save" onclick="salveaza()">Salvează modificările</button>
@@ -354,7 +354,6 @@ async function salveaza(){
   }catch(e){alert("Eroare: "+e.message);}
 }
 
-// Init
 if(isMobile()){
   document.getElementById("content").style.display="none";
   document.getElementById("sidebar").style.display="flex";
