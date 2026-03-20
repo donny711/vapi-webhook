@@ -72,15 +72,25 @@ async function getSheet() {
 }
 
 // ─── RECUNOASTERE PACIENT ──────────────────────────────────────────────────
+// Returnează CEL MAI RECENT rând al pacientului după appointment_datetime
 async function cautaPacientDupaCaller(callerId) {
   if (!callerId) return null;
   try {
     const sheet = await getSheet();
     const rows  = await sheet.getRows();
-    const found = rows.find(
+
+    const aleale = rows.filter(
       (r) => r.get("caller_id_number") === callerId || r.get("phone_number") === callerId
     );
-    if (!found) return null;
+    if (aleale.length === 0) return null;
+
+    // Sortează descrescător după dată și ia primul (cel mai recent)
+    const found = aleale.sort((a, b) => {
+      const da = new Date(a.get("appointment_datetime") || 0);
+      const db = new Date(b.get("appointment_datetime") || 0);
+      return db - da;
+    })[0];
+
     return {
       full_name:            found.get("full_name"),
       pain_complaint:       found.get("pain_complaint"),
@@ -105,10 +115,10 @@ function normalizeazaTelefon(telefon) {
 
 async function trimiteReminderSMS(telefon, numePacient, dataOra) {
   if (!SMSLINK_ID || !SMSLINK_PWD) { console.warn("SMSLINK credentials lipsa."); return; }
-  const tel = normalizeazaTelefon(telefon);
-  const ora = extrageOra(dataOra);
+  const tel  = normalizeazaTelefon(telefon);
+  const ora  = extrageOra(dataOra);
   const mesaj = `Juni Performance: Buna ziua, ${numePacient}! Va asteptam maine la ora ${ora}. Reprogramari: ${CLINIC_PHONE}.`;
-  const url = `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
+  const url  = `https://secure.smslink.ro/sms/gateway/communicate/index.php` +
     `?connection_id=${encodeURIComponent(SMSLINK_ID)}&password=${encodeURIComponent(SMSLINK_PWD)}` +
     `&to=${encodeURIComponent(tel)}&message=${encodeURIComponent(mesaj)}`;
   try {
@@ -129,10 +139,10 @@ cron.schedule("0 10 * * *", async () => {
     const dataMaine = maine.toISOString().split("T")[0];
     let trimise = 0;
     for (const row of rows) {
-      const dt          = row.get("appointment_datetime") || "";
+      const dt           = row.get("appointment_datetime") || "";
       const reminderSent = row.get("reminder_sent") || "";
-      const telefon     = row.get("phone_number") || row.get("caller_id_number") || "";
-      const nume        = row.get("full_name") || "pacient";
+      const telefon      = row.get("phone_number") || row.get("caller_id_number") || "";
+      const nume         = row.get("full_name") || "pacient";
       if (!dt || reminderSent === "true") continue;
       if (!dt.includes(dataMaine)) continue;
       await trimiteReminderSMS(telefon, nume, dt);
@@ -161,7 +171,7 @@ app.get("/pacienti", async (_req, res) => {
           diagnostic:           row.get("pain_complaint") || "",
           sedinte_ramase:       parseInt(row.get("sedinte_ramase") || "0"),
           note_terapeut:        row.get("note_terapeut") || "",
-          urgent:               row.get("urgent") === "true",
+          urgent:               String(row.get("urgent") || "").toLowerCase() === "true",
           tip_serviciu:         row.get("tip_serviciu") || "fizioterapie",
           appointment_datetime: row.get("appointment_datetime") || "",
           ultima_vizita:        row.get("appointment_datetime")?.split("T")[0] || "",
@@ -174,9 +184,9 @@ app.get("/pacienti", async (_req, res) => {
 
 app.get("/pacienti/:telefon", async (req, res) => {
   try {
-    const sheet = await getSheet();
-    const rows  = await sheet.getRows();
-    const tel   = req.params.telefon;
+    const sheet      = await getSheet();
+    const rows       = await sheet.getRows();
+    const tel        = req.params.telefon;
     const programari = rows
       .filter(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel)
       .map(r => ({
@@ -194,7 +204,7 @@ app.put("/pacienti/:telefon", async (req, res) => {
     const rows  = await sheet.getRows();
     const tel   = req.params.telefon;
     const { sedinte_ramase, note_terapeut, urgent, tip_serviciu } = req.body;
-    const row = rows.find(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel);
+    const row   = rows.find(r => r.get("phone_number") === tel || r.get("caller_id_number") === tel);
     if (!row) return res.status(404).json({ error: "Pacient negăsit" });
     if (sedinte_ramase !== undefined) row.set("sedinte_ramase", String(sedinte_ramase));
     if (note_terapeut  !== undefined) row.set("note_terapeut", note_terapeut);
@@ -215,7 +225,6 @@ app.post("/vapi/webhook", async (req, res) => {
 
   // ── Recunoaștere pacient la începutul apelului ──────────────────────────
   if (type === "assistant-request") {
-    res.setHeader("Content-Type", "application/json");
     try {
       const pacient = await cautaPacientDupaCaller(callerId);
 
@@ -229,6 +238,8 @@ app.post("/vapi/webhook", async (req, res) => {
 
       const tip  = pacient.tip_serviciu || "fizioterapie";
       const nume = pacient.full_name?.split(" ")[0] || "";
+
+      // Cel mai recent tip e evaluare și data e în trecut → evaluare finalizată
       const dataEval = pacient.appointment_datetime ? new Date(pacient.appointment_datetime) : null;
       const eEvaluareFinalizata = tip === "evaluare" && dataEval && dataEval < new Date();
 
@@ -239,7 +250,7 @@ app.post("/vapi/webhook", async (req, res) => {
         firstMessage = `Bine ai revenit, ${nume}! Ai nevoie de informatii sau vrei sa programam urmatoarea sedinta de ${tip}?`;
       }
 
-      console.log(`Pacient recunoscut la apel: ${pacient.full_name} (${callerId}) — ${tip}`);
+      console.log(`Pacient recunoscut: ${pacient.full_name} (${callerId}) — ${tip}`);
       return res.json({ assistant: { firstMessage } });
 
     } catch (err) {
@@ -252,9 +263,8 @@ app.post("/vapi/webhook", async (req, res) => {
     }
   }
 
-  // ── End of call report ──────────────────────────────────────────────────
+  // ── End of call ─────────────────────────────────────────────────────────
   res.sendStatus(200);
-
   if (type !== "end-of-call-report") return;
 
   const structuredData = req.body?.message?.analysis?.structuredData;
@@ -310,10 +320,10 @@ app.get("/test-reminders", async (_req, res) => {
     const dataMaine = maine.toISOString().split("T")[0];
     let trimise = 0;
     for (const row of rows) {
-      const dt          = row.get("appointment_datetime") || "";
+      const dt           = row.get("appointment_datetime") || "";
       const reminderSent = row.get("reminder_sent") || "";
-      const telefon     = row.get("phone_number") || row.get("caller_id_number") || "";
-      const nume        = row.get("full_name") || "pacient";
+      const telefon      = row.get("phone_number") || row.get("caller_id_number") || "";
+      const nume         = row.get("full_name") || "pacient";
       if (!dt || reminderSent === "true") continue;
       if (!dt.includes(dataMaine)) continue;
       await trimiteReminderSMS(telefon, nume, dt);
